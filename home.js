@@ -30,11 +30,67 @@ const CYCLE_PHASES = [
   { id: 'luteal', label: 'Luteal', emoji: '🌕', color: '#8E44AD', day: '17-28' },
 ];
 
-export default function HomeScreen({ userName, userPlan, onNavigate }) {
+const JOURNEY_CONTENT = {
+  conceive: {
+    emoji: '🌱',
+    title: 'TTC Journey',
+    text: 'Your fertile window is approaching. Track your ovulation today.',
+    color: '#27AE60',
+    bg: '#F0FFF4',
+    quickActions: [
+      { id: 'cycle', emoji: '🌱', label: 'Ovulation' },
+      { id: 'tracker', emoji: '📊', label: 'Log Today' },
+      { id: 'bella', emoji: '🤖', label: 'Ask Bella' },
+      { id: 'nutrition', emoji: '🥗', label: 'Nutrition' },
+    ],
+  },
+  pregnant: {
+    emoji: '🤰',
+    title: 'Pregnancy Journey',
+    text: 'You are doing amazing. Log your symptoms and check your weekly update.',
+    color: '#9B59B6',
+    bg: '#F5EEFF',
+    quickActions: [
+      { id: 'tracker', emoji: '📊', label: 'Symptoms' },
+      { id: 'bella', emoji: '🤖', label: 'Ask Bella' },
+      { id: 'academy', emoji: '📚', label: 'Learn' },
+      { id: 'carefinder', emoji: '🏥', label: 'Care' },
+    ],
+  },
+  surrogacy: {
+    emoji: '👶',
+    title: 'Surrogacy Journey',
+    text: 'Bella is here to support you every step of the way.',
+    color: '#E91E8C',
+    bg: '#FFF0F8',
+    quickActions: [
+      { id: 'bella', emoji: '🤖', label: 'Ask Bella' },
+      { id: 'community', emoji: '👥', label: 'Community' },
+      { id: 'academy', emoji: '📚', label: 'Learn' },
+      { id: 'carefinder', emoji: '🏥', label: 'Care' },
+    ],
+  },
+  wellbeing: {
+    emoji: '💜',
+    title: 'Wellbeing Journey',
+    text: 'Track your cycle and understand your body better every day.',
+    color: '#C9748F',
+    bg: '#FFF0F5',
+    quickActions: [
+      { id: 'cycle', emoji: '🌸', label: 'Cycle' },
+      { id: 'bella', emoji: '🤖', label: 'Ask Bella' },
+      { id: 'community', emoji: '👥', label: 'Community' },
+      { id: 'academy', emoji: '📚', label: 'Academy' },
+    ],
+  },
+};
+
+export default function HomeScreen({ userName, userPlan, userJourney, onNavigate }) {
   const [currentPhase] = useState(1);
   const scrollY = useRef(new Animated.Value(0)).current;
 
   const firstName = userName ? userName.split(' ')[0] : 'Beautiful';
+  const journey = JOURNEY_CONTENT[userJourney] || JOURNEY_CONTENT.wellbeing;
 
   const headerHeight = scrollY.interpolate({
     inputRange: [0, 100],
@@ -85,8 +141,6 @@ export default function HomeScreen({ userName, userPlan, onNavigate }) {
               </TouchableOpacity>
             </View>
           </View>
-
-          {/* Plan badge */}
           <View style={styles.planBadge}>
             <Text style={styles.planBadgeText}>
               {userPlan === 'PRO' ? '👑 PRO' : userPlan === 'PLUS' ? '⭐ PLUS' : '🆓 FREE'}
@@ -94,11 +148,28 @@ export default function HomeScreen({ userName, userPlan, onNavigate }) {
           </View>
         </Animated.View>
 
+        {/* Journey Banner */}
+        <TouchableOpacity
+          style={[styles.journeyBanner, {
+            backgroundColor: journey.bg,
+            borderLeftColor: journey.color,
+          }]}
+          onPress={() => onNavigate('cycle')}
+        >
+          <Text style={styles.journeyBannerEmoji}>{journey.emoji}</Text>
+          <View style={styles.journeyBannerInfo}>
+            <Text style={[styles.journeyBannerTitle, { color: journey.color }]}>
+              {journey.title}
+            </Text>
+            <Text style={styles.journeyBannerText}>{journey.text}</Text>
+          </View>
+          <Text style={[styles.journeyBannerArrow, { color: journey.color }]}>›</Text>
+        </TouchableOpacity>
+
         {/* Flower Cycle Tracker */}
         <View style={styles.flowerSection}>
           <Text style={styles.sectionTitle}>Your Cycle</Text>
           <View style={styles.flowerContainer}>
-            {/* Petals */}
             {CYCLE_PHASES.map((phase, index) => {
               const angles = [-45, 45, 135, 225];
               const angle = angles[index];
@@ -107,7 +178,6 @@ export default function HomeScreen({ userName, userPlan, onNavigate }) {
               const x = Math.cos(rad) * distance;
               const y = Math.sin(rad) * distance;
               const isActive = index === currentPhase;
-
               return (
                 <TouchableOpacity
                   key={phase.id}
@@ -130,8 +200,6 @@ export default function HomeScreen({ userName, userPlan, onNavigate }) {
                 </TouchableOpacity>
               );
             })}
-
-            {/* Center */}
             <TouchableOpacity
               style={styles.flowerCenter}
               onPress={() => onNavigate('cycle')}
@@ -142,7 +210,6 @@ export default function HomeScreen({ userName, userPlan, onNavigate }) {
             </TouchableOpacity>
           </View>
 
-          {/* Phase labels */}
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -175,38 +242,20 @@ export default function HomeScreen({ userName, userPlan, onNavigate }) {
           </ScrollView>
         </View>
 
-        {/* Quick Actions */}
+        {/* Journey Quick Actions */}
         <View style={styles.quickSection}>
           <Text style={styles.sectionTitle}>Quick Actions</Text>
           <View style={styles.quickRow}>
-            <TouchableOpacity
-              style={[styles.quickCard, { backgroundColor: '#E8E4FF' }]}
-              onPress={() => onNavigate('bella')}
-            >
-              <Text style={styles.quickEmoji}>🤖</Text>
-              <Text style={styles.quickLabel}>Ask Bella</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.quickCard, { backgroundColor: '#FFE4EC' }]}
-              onPress={() => onNavigate('tracker')}
-            >
-              <Text style={styles.quickEmoji}>📊</Text>
-              <Text style={styles.quickLabel}>Log Today</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.quickCard, { backgroundColor: '#E4FFE8' }]}
-              onPress={() => onNavigate('community')}
-            >
-              <Text style={styles.quickEmoji}>👥</Text>
-              <Text style={styles.quickLabel}>Community</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.quickCard, { backgroundColor: '#FFF4E4' }]}
-              onPress={() => onNavigate('academy')}
-            >
-              <Text style={styles.quickEmoji}>📚</Text>
-              <Text style={styles.quickLabel}>Academy</Text>
-            </TouchableOpacity>
+            {journey.quickActions.map((action, index) => (
+              <TouchableOpacity
+                key={index}
+                style={[styles.quickCard, { backgroundColor: FEATURES.find(f => f.id === action.id)?.bg || '#F0F0F0' }]}
+                onPress={() => onNavigate(action.id)}
+              >
+                <Text style={styles.quickEmoji}>{action.emoji}</Text>
+                <Text style={styles.quickLabel}>{action.label}</Text>
+              </TouchableOpacity>
+            ))}
           </View>
         </View>
 
@@ -230,7 +279,7 @@ export default function HomeScreen({ userName, userPlan, onNavigate }) {
           </View>
         </View>
 
-        {/* Admin button - subtle */}
+        {/* Admin button */}
         <TouchableOpacity
           style={styles.adminBtn}
           onPress={() => onNavigate('admin')}
@@ -275,15 +324,24 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     alignItems: 'center', justifyContent: 'center',
   },
-  profileInitial: {
-    fontSize: 18, fontWeight: '800', color: COLORS.primary,
-  },
+  profileInitial: { fontSize: 18, fontWeight: '800', color: COLORS.primary },
   planBadge: {
     alignSelf: 'flex-start',
     backgroundColor: 'rgba(255,255,255,0.2)',
     borderRadius: 50, paddingHorizontal: 14, paddingVertical: 6,
   },
   planBadgeText: { color: '#fff', fontSize: 13, fontWeight: '700' },
+  journeyBanner: {
+    marginHorizontal: 20, marginTop: 16,
+    borderRadius: 16, padding: 16,
+    flexDirection: 'row', alignItems: 'center',
+    gap: 12, borderLeftWidth: 4,
+  },
+  journeyBannerEmoji: { fontSize: 28 },
+  journeyBannerInfo: { flex: 1 },
+  journeyBannerTitle: { fontSize: 14, fontWeight: '800', marginBottom: 3 },
+  journeyBannerText: { fontSize: 12, color: COLORS.textLight, lineHeight: 18 },
+  journeyBannerArrow: { fontSize: 24, fontWeight: '700' },
   flowerSection: {
     margin: 20,
     backgroundColor: COLORS.white,
@@ -337,9 +395,7 @@ const styles = StyleSheet.create({
   quickEmoji: { fontSize: 26, marginBottom: 6 },
   quickLabel: { fontSize: 11, fontWeight: '700', color: COLORS.text, textAlign: 'center' },
   featuresSection: { paddingHorizontal: 20, marginTop: 16 },
-  featuresGrid: {
-    flexDirection: 'row', flexWrap: 'wrap', gap: 12,
-  },
+  featuresGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   featureCard: {
     width: (width - 52) / 2,
     borderRadius: 20, padding: 18,
@@ -349,8 +405,7 @@ const styles = StyleSheet.create({
   featureTitle: { fontSize: 14, fontWeight: '800', marginBottom: 4 },
   featureSubtitle: { fontSize: 12, color: COLORS.textLight },
   adminBtn: {
-    alignSelf: 'center',
-    marginTop: 20,
+    alignSelf: 'center', marginTop: 20,
     width: 40, height: 40, borderRadius: 20,
     backgroundColor: COLORS.background,
     alignItems: 'center', justifyContent: 'center',

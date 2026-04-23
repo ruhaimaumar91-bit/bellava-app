@@ -14,49 +14,60 @@ const DAYS_OF_WEEK = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 const PHASE_INFO = [
   {
-    id: 'menstrual',
-    emoji: '🌙',
-    label: 'Menstrual',
-    days: 'Days 1–5',
-    color: '#E74C3C',
-    bg: '#FFF0F0',
+    id: 'menstrual', emoji: '🌙', label: 'Menstrual',
+    days: 'Days 1–5', color: '#E74C3C', bg: '#FFF0F0',
     description: 'Your period. Rest, warmth and iron-rich foods help. Be kind to yourself.',
   },
   {
-    id: 'follicular',
-    emoji: '🌱',
-    label: 'Follicular',
-    days: 'Days 6–13',
-    color: '#27AE60',
-    bg: '#F0FFF4',
+    id: 'follicular', emoji: '🌱', label: 'Follicular',
+    days: 'Days 6–13', color: '#27AE60', bg: '#F0FFF4',
     description: 'Energy rises. Great time for new projects, exercise and socialising.',
   },
   {
-    id: 'ovulation',
-    emoji: '✨',
-    label: 'Ovulation',
-    days: 'Days 14–16',
-    color: '#F39C12',
-    bg: '#FFFDE6',
+    id: 'ovulation', emoji: '✨', label: 'Ovulation',
+    days: 'Days 14–16', color: '#F39C12', bg: '#FFFDE6',
     description: 'Peak energy and confidence. Most fertile time of your cycle.',
   },
   {
-    id: 'luteal',
-    emoji: '🌕',
-    label: 'Luteal',
-    days: 'Days 17–28',
-    color: '#8E44AD',
-    bg: '#F5EEFF',
+    id: 'luteal', emoji: '🌕', label: 'Luteal',
+    days: 'Days 17–28', color: '#8E44AD', bg: '#F5EEFF',
     description: 'Wind down. PMS may appear. Rest, nourish and reduce stress.',
   },
 ];
+
+const JOURNEY_TIPS = {
+  conceive: [
+    { emoji: '🌱', tip: 'Track your LH surge with ovulation test strips for the most accurate fertile window detection.' },
+    { emoji: '🌡️', tip: 'Take your basal body temperature every morning before getting up to spot your ovulation pattern.' },
+    { emoji: '🥗', tip: 'Folic acid (400mcg daily), iron and zinc support healthy fertility for both partners.' },
+    { emoji: '💜', tip: 'The TTC journey can be emotional. Be kind to yourself and lean on your support network.' },
+  ],
+  pregnant: [
+    { emoji: '🤰', tip: 'Your cycle tracker now helps monitor pregnancy symptoms week by week.' },
+    { emoji: '💊', tip: 'Continue taking folic acid until at least week 12. Ask your midwife about vitamin D.' },
+    { emoji: '🏥', tip: 'Book your dating scan between 8-12 weeks if you have not already done so.' },
+    { emoji: '💜', tip: 'Mood changes are completely normal in pregnancy. Talk to your midwife if you are struggling.' },
+  ],
+  surrogacy: [
+    { emoji: '👶', tip: 'Whether you are a surrogate or intended parent, tracking health and wellbeing is important.' },
+    { emoji: '💜', tip: 'Surrogacy UK and COTS are excellent resources for support and legal guidance.' },
+    { emoji: '🏥', tip: 'Regular check-ins with your healthcare team are essential throughout the surrogacy journey.' },
+    { emoji: '🌸', tip: 'The emotional aspects of surrogacy are unique. Consider connecting with a surrogacy counsellor.' },
+  ],
+  wellbeing: [
+    { emoji: '🌸', tip: 'Understanding your cycle phases helps you work with your body, not against it.' },
+    { emoji: '🥗', tip: 'Eating iron-rich foods during your period helps replenish what is lost during bleeding.' },
+    { emoji: '💪', tip: 'Gentle exercise during your period can actually help reduce cramps and improve mood.' },
+    { emoji: '💜', tip: 'Your cycle is unique to you. Track for 3 months to understand your personal patterns.' },
+  ],
+};
 
 const PERIOD_SYMPTOMS = [
   'Cramps', 'Bloating', 'Headache', 'Fatigue', 'Mood changes',
   'Back pain', 'Breast tenderness', 'Nausea', 'Spotting', 'Heavy flow',
 ];
 
-export default function CycleScreen({ onBack, userPlan }) {
+export default function CycleScreen({ onBack, userPlan, userJourney }) {
   const today = new Date();
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
@@ -68,6 +79,25 @@ export default function CycleScreen({ onBack, userPlan }) {
   const [cycleLength] = useState(28);
   const [periodLength] = useState(5);
 
+  const journey = userJourney || 'wellbeing';
+  const tips = JOURNEY_TIPS[journey] || JOURNEY_TIPS.wellbeing;
+
+  const getJourneyColor = () => {
+    if (journey === 'conceive') return '#27AE60';
+    if (journey === 'pregnant') return '#9B59B6';
+    if (journey === 'surrogacy') return '#E91E8C';
+    return COLORS.primary;
+  };
+
+  const getJourneyTitle = () => {
+    if (journey === 'conceive') return '🌱 TTC Cycle Tracker';
+    if (journey === 'pregnant') return '🤰 Pregnancy Tracker';
+    if (journey === 'surrogacy') return '👶 Surrogacy Tracker';
+    return '🌸 Cycle Tracker';
+  };
+
+  const journeyColor = getJourneyColor();
+
   const getDaysInMonth = (month, year) => new Date(year, month + 1, 0).getDate();
   const getFirstDayOfMonth = (month, year) => new Date(year, month, 1).getDay();
 
@@ -75,21 +105,13 @@ export default function CycleScreen({ onBack, userPlan }) {
   const firstDay = getFirstDayOfMonth(currentMonth, currentYear);
 
   const prevMonth = () => {
-    if (currentMonth === 0) {
-      setCurrentMonth(11);
-      setCurrentYear(y => y - 1);
-    } else {
-      setCurrentMonth(m => m - 1);
-    }
+    if (currentMonth === 0) { setCurrentMonth(11); setCurrentYear(y => y - 1); }
+    else setCurrentMonth(m => m - 1);
   };
 
   const nextMonth = () => {
-    if (currentMonth === 11) {
-      setCurrentMonth(0);
-      setCurrentYear(y => y + 1);
-    } else {
-      setCurrentMonth(m => m + 1);
-    }
+    if (currentMonth === 11) { setCurrentMonth(0); setCurrentYear(y => y + 1); }
+    else setCurrentMonth(m => m + 1);
   };
 
   const getDayType = (day) => {
@@ -150,20 +172,23 @@ export default function CycleScreen({ onBack, userPlan }) {
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
 
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { borderBottomColor: journeyColor }]}>
         <TouchableOpacity onPress={onBack} style={styles.backBtn}>
           <Text style={styles.backArrow}>←</Text>
         </TouchableOpacity>
         <View>
-          <Text style={styles.headerTitle}>Cycle Tracker</Text>
-          <Text style={styles.headerSub}>Your monthly overview 🌸</Text>
+          <Text style={styles.headerTitle}>{getJourneyTitle()}</Text>
+          <Text style={styles.headerSub}>Your monthly overview</Text>
         </View>
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
 
         {/* Current Phase Banner */}
-        <View style={[styles.phaseBanner, { backgroundColor: currentPhase.bg, borderLeftColor: currentPhase.color }]}>
+        <View style={[styles.phaseBanner, {
+          backgroundColor: currentPhase.bg,
+          borderLeftColor: currentPhase.color,
+        }]}>
           <Text style={styles.phaseEmoji}>{currentPhase.emoji}</Text>
           <View style={styles.phaseInfo}>
             <Text style={[styles.phaseLabel, { color: currentPhase.color }]}>
@@ -173,9 +198,21 @@ export default function CycleScreen({ onBack, userPlan }) {
           </View>
         </View>
 
+        {/* Fertile Window Banner for TTC */}
+        {journey === 'conceive' && (
+          <View style={styles.fertileWindow}>
+            <Text style={styles.fertileWindowEmoji}>🌱</Text>
+            <View style={styles.fertileWindowInfo}>
+              <Text style={styles.fertileWindowTitle}>Fertile Window</Text>
+              <Text style={styles.fertileWindowText}>
+                Days {ovulationDay - 2}–{ovulationDay + 1} are your most fertile days this cycle
+              </Text>
+            </View>
+          </View>
+        )}
+
         {/* Calendar */}
         <View style={styles.calendarCard}>
-          {/* Month navigation */}
           <View style={styles.monthNav}>
             <TouchableOpacity onPress={prevMonth} style={styles.navBtn}>
               <Text style={styles.navArrow}>‹</Text>
@@ -188,14 +225,12 @@ export default function CycleScreen({ onBack, userPlan }) {
             </TouchableOpacity>
           </View>
 
-          {/* Day headers */}
           <View style={styles.dayHeaders}>
             {DAYS_OF_WEEK.map(d => (
               <Text key={d} style={styles.dayHeader}>{d}</Text>
             ))}
           </View>
 
-          {/* Calendar grid */}
           <View style={styles.calendarGrid}>
             {calendarDays.map((day, index) => {
               if (!day) return <View key={`empty-${index}`} style={styles.calendarCell} />;
@@ -214,7 +249,7 @@ export default function CycleScreen({ onBack, userPlan }) {
                     {
                       backgroundColor: dayStyle.bg,
                       borderWidth: isToday ? 2 : dayStyle.border !== 'transparent' ? 1 : 0,
-                      borderColor: isToday ? COLORS.primary : dayStyle.border,
+                      borderColor: isToday ? journeyColor : dayStyle.border,
                     },
                   ]}
                   onPress={() => {
@@ -227,17 +262,17 @@ export default function CycleScreen({ onBack, userPlan }) {
                   </Text>
                   {type === 'period' && <Text style={styles.dayDot}>🔴</Text>}
                   {type === 'ovulation' && <Text style={styles.dayDot}>✨</Text>}
+                  {(type === 'fertile' && journey === 'conceive') && <Text style={styles.dayDot}>🌱</Text>}
                   {hasSymptoms && <Text style={styles.dayDot}>📝</Text>}
                 </TouchableOpacity>
               );
             })}
           </View>
 
-          {/* Legend */}
           <View style={styles.legend}>
             {[
               { color: '#E74C3C', label: 'Period', bg: '#FFE0E0' },
-              { color: '#F39C12', label: 'Ovulation', bg: '#FFF3CD' },
+              { color: '#F39C12', label: journey === 'conceive' ? 'Fertile' : 'Ovulation', bg: '#FFF3CD' },
               { color: '#27AE60', label: 'Follicular', bg: '#E8F8EE' },
               { color: '#8E44AD', label: 'Luteal', bg: '#F3E8FF' },
             ].map(item => (
@@ -249,18 +284,17 @@ export default function CycleScreen({ onBack, userPlan }) {
           </View>
         </View>
 
-        {/* Phase Guide */}
-        <Text style={styles.sectionTitle}>Cycle Phases Guide</Text>
-        {PHASE_INFO.map(phase => (
-          <View key={phase.id} style={[styles.phaseCard, { backgroundColor: phase.bg, borderLeftColor: phase.color }]}>
-            <View style={styles.phaseCardHeader}>
-              <Text style={styles.phaseCardEmoji}>{phase.emoji}</Text>
-              <View>
-                <Text style={[styles.phaseCardLabel, { color: phase.color }]}>{phase.label}</Text>
-                <Text style={styles.phaseCardDays}>{phase.days}</Text>
-              </View>
-            </View>
-            <Text style={styles.phaseCardDesc}>{phase.description}</Text>
+        {/* Journey Tips */}
+        <Text style={styles.sectionTitle}>
+          {journey === 'conceive' ? '🌱 TTC Tips' :
+           journey === 'pregnant' ? '🤰 Pregnancy Tips' :
+           journey === 'surrogacy' ? '👶 Surrogacy Support' :
+           '💜 Cycle Tips'}
+        </Text>
+        {tips.map((tip, i) => (
+          <View key={i} style={[styles.tipCard, { borderLeftColor: journeyColor }]}>
+            <Text style={styles.tipEmoji}>{tip.emoji}</Text>
+            <Text style={styles.tipText}>{tip.tip}</Text>
           </View>
         ))}
 
@@ -269,17 +303,17 @@ export default function CycleScreen({ onBack, userPlan }) {
           <Text style={styles.statsTitle}>📊 Your Cycle Stats</Text>
           <View style={styles.statsRow}>
             <View style={styles.statItem}>
-              <Text style={styles.statValue}>{cycleLength}</Text>
+              <Text style={[styles.statValue, { color: journeyColor }]}>{cycleLength}</Text>
               <Text style={styles.statLabel}>Cycle length</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
-              <Text style={styles.statValue}>{periodLength}</Text>
+              <Text style={[styles.statValue, { color: journeyColor }]}>{periodLength}</Text>
               <Text style={styles.statLabel}>Period days</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
-              <Text style={styles.statValue}>{ovulationDay}</Text>
+              <Text style={[styles.statValue, { color: journeyColor }]}>{ovulationDay}</Text>
               <Text style={styles.statLabel}>Ovulation day</Text>
             </View>
           </View>
@@ -298,7 +332,6 @@ export default function CycleScreen({ onBack, userPlan }) {
                 <Text style={styles.modalTitle}>
                   {MONTHS[currentMonth]} {selectedDay}, {currentYear}
                 </Text>
-
                 <TouchableOpacity
                   style={[
                     styles.periodToggle,
@@ -307,10 +340,11 @@ export default function CycleScreen({ onBack, userPlan }) {
                   onPress={() => togglePeriodDay(selectedDay)}
                 >
                   <Text style={styles.periodToggleText}>
-                    {periodDays.includes(selectedDay) ? '🔴 Period day (tap to remove)' : '➕ Mark as period day'}
+                    {periodDays.includes(selectedDay)
+                      ? '🔴 Period day (tap to remove)'
+                      : '➕ Mark as period day'}
                   </Text>
                 </TouchableOpacity>
-
                 <Text style={styles.symptomsTitle}>Log symptoms:</Text>
                 <View style={styles.symptomsGrid}>
                   {PERIOD_SYMPTOMS.map(symptom => {
@@ -321,7 +355,10 @@ export default function CycleScreen({ onBack, userPlan }) {
                         style={[styles.symptomChip, isSelected && styles.symptomChipActive]}
                         onPress={() => toggleSymptom(selectedDay, symptom)}
                       >
-                        <Text style={[styles.symptomChipText, isSelected && styles.symptomChipTextActive]}>
+                        <Text style={[
+                          styles.symptomChipText,
+                          isSelected && { color: journeyColor },
+                        ]}>
                           {symptom}
                         </Text>
                       </TouchableOpacity>
@@ -331,7 +368,7 @@ export default function CycleScreen({ onBack, userPlan }) {
               </>
             )}
             <TouchableOpacity
-              style={styles.closeBtn}
+              style={[styles.closeBtn, { backgroundColor: journeyColor }]}
               onPress={() => setShowDayModal(false)}
             >
               <Text style={styles.closeBtnText}>Done ✓</Text>
@@ -349,7 +386,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center',
     paddingHorizontal: 20, paddingVertical: 16,
     backgroundColor: COLORS.white,
-    borderBottomWidth: 1, borderBottomColor: COLORS.border, gap: 12,
+    borderBottomWidth: 2, gap: 12,
   },
   backBtn: {
     width: 40, height: 40, borderRadius: 20,
@@ -363,12 +400,22 @@ const styles = StyleSheet.create({
   phaseBanner: {
     flexDirection: 'row', alignItems: 'center',
     borderRadius: 16, padding: 16,
-    borderLeftWidth: 4, marginBottom: 16, gap: 12,
+    borderLeftWidth: 4, marginBottom: 12, gap: 12,
   },
   phaseEmoji: { fontSize: 32 },
   phaseInfo: { flex: 1 },
   phaseLabel: { fontSize: 15, fontWeight: '700', marginBottom: 4 },
   phaseDesc: { fontSize: 13, color: COLORS.textLight, lineHeight: 20 },
+  fertileWindow: {
+    flexDirection: 'row', alignItems: 'center',
+    backgroundColor: '#F0FFF4', borderRadius: 16,
+    padding: 14, marginBottom: 12, gap: 12,
+    borderWidth: 1, borderColor: '#27AE60',
+  },
+  fertileWindowEmoji: { fontSize: 28 },
+  fertileWindowInfo: { flex: 1 },
+  fertileWindowTitle: { fontSize: 15, fontWeight: '800', color: '#27AE60', marginBottom: 2 },
+  fertileWindowText: { fontSize: 13, color: COLORS.textLight },
   calendarCard: {
     backgroundColor: COLORS.white, borderRadius: 20,
     padding: 16, marginBottom: 16,
@@ -389,8 +436,7 @@ const styles = StyleSheet.create({
   dayHeaders: { flexDirection: 'row', marginBottom: 8 },
   dayHeader: {
     flex: 1, textAlign: 'center',
-    fontSize: 12, fontWeight: '700',
-    color: COLORS.textLight,
+    fontSize: 12, fontWeight: '700', color: COLORS.textLight,
   },
   calendarGrid: { flexDirection: 'row', flexWrap: 'wrap' },
   calendarCell: {
@@ -406,27 +452,20 @@ const styles = StyleSheet.create({
     borderTopWidth: 1, borderTopColor: COLORS.border,
   },
   legendItem: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  legendDot: {
-    width: 14, height: 14, borderRadius: 7,
-    borderWidth: 1.5,
-  },
+  legendDot: { width: 14, height: 14, borderRadius: 7, borderWidth: 1.5 },
   legendText: { fontSize: 11, color: COLORS.textLight },
   sectionTitle: {
     fontSize: 17, fontWeight: '800',
     color: COLORS.text, marginBottom: 12, marginTop: 4,
   },
-  phaseCard: {
-    borderRadius: 16, padding: 14,
-    borderLeftWidth: 4, marginBottom: 10,
+  tipCard: {
+    flexDirection: 'row', alignItems: 'flex-start',
+    backgroundColor: COLORS.white, borderRadius: 16,
+    padding: 14, marginBottom: 10, gap: 12,
+    borderLeftWidth: 4,
   },
-  phaseCardHeader: {
-    flexDirection: 'row', alignItems: 'center',
-    gap: 10, marginBottom: 6,
-  },
-  phaseCardEmoji: { fontSize: 24 },
-  phaseCardLabel: { fontSize: 14, fontWeight: '700' },
-  phaseCardDays: { fontSize: 12, color: COLORS.textLight },
-  phaseCardDesc: { fontSize: 13, color: COLORS.text, lineHeight: 20 },
+  tipEmoji: { fontSize: 22 },
+  tipText: { fontSize: 14, color: COLORS.text, lineHeight: 21, flex: 1 },
   statsCard: {
     backgroundColor: COLORS.white, borderRadius: 20,
     padding: 20, marginTop: 8,
@@ -436,7 +475,7 @@ const styles = StyleSheet.create({
   statsTitle: { fontSize: 16, fontWeight: '800', color: COLORS.text, marginBottom: 16 },
   statsRow: { flexDirection: 'row', alignItems: 'center' },
   statItem: { flex: 1, alignItems: 'center' },
-  statValue: { fontSize: 28, fontWeight: '800', color: COLORS.primary },
+  statValue: { fontSize: 28, fontWeight: '800' },
   statLabel: { fontSize: 12, color: COLORS.textLight, marginTop: 4 },
   statDivider: { width: 1, height: 40, backgroundColor: COLORS.border },
   modalOverlay: {
@@ -460,28 +499,19 @@ const styles = StyleSheet.create({
     alignItems: 'center', marginBottom: 20,
     borderWidth: 1.5, borderColor: COLORS.border,
   },
-  periodToggleActive: {
-    backgroundColor: '#FFE0E0', borderColor: '#E74C3C',
-  },
+  periodToggleActive: { backgroundColor: '#FFE0E0', borderColor: '#E74C3C' },
   periodToggleText: { fontSize: 15, fontWeight: '600', color: COLORS.text },
-  symptomsTitle: {
-    fontSize: 15, fontWeight: '700',
-    color: COLORS.text, marginBottom: 12,
-  },
+  symptomsTitle: { fontSize: 15, fontWeight: '700', color: COLORS.text, marginBottom: 12 },
   symptomsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 20 },
   symptomChip: {
     paddingHorizontal: 14, paddingVertical: 8,
     borderRadius: 50, backgroundColor: COLORS.background,
     borderWidth: 1.5, borderColor: COLORS.border,
   },
-  symptomChipActive: {
-    backgroundColor: COLORS.primaryLight, borderColor: COLORS.primary,
-  },
+  symptomChipActive: { backgroundColor: COLORS.primaryLight, borderColor: COLORS.primary },
   symptomChipText: { fontSize: 13, color: COLORS.textLight, fontWeight: '600' },
-  symptomChipTextActive: { color: COLORS.primary },
   closeBtn: {
-    backgroundColor: COLORS.primary, borderRadius: 50,
-    paddingVertical: 14, alignItems: 'center',
+    borderRadius: 50, paddingVertical: 14, alignItems: 'center',
   },
   closeBtnText: { color: '#fff', fontWeight: '700', fontSize: 16 },
 });
