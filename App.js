@@ -8,6 +8,7 @@ import OnboardingScreen from './onboarding';
 import LoginScreen from './login';
 import SignupScreen from './signup';
 import DisclaimerScreen from './disclaimer';
+import JourneyScreen from './journey';
 import HomeScreen from './home';
 import BellaScreen from './bella';
 import CycleScreen from './cycle';
@@ -28,7 +29,7 @@ const TABS = [
   { id: 'home', label: 'Home', emoji: '🏠' },
   { id: 'cycle', label: 'Cycle', emoji: '🌸' },
   { id: 'bella', label: 'Bella', emoji: '🤖' },
-  { id: 'community', label: 'Community', emoji: '👥' },
+  { id: 'community', label: 'Connect', emoji: '👥' },
   { id: 'profile', label: 'Profile', emoji: '👤' },
 ];
 
@@ -48,6 +49,7 @@ export default function App() {
   const [userName, setUserName] = useState('');
   const [userEmail, setUserEmail] = useState('');
   const [userPlan, setUserPlan] = useState('FREE');
+  const [userJourney, setUserJourney] = useState(null);
 
   const handleLoginSuccess = (name, email) => {
     setUserName(name || 'Beautiful');
@@ -65,6 +67,7 @@ export default function App() {
     setUserName('');
     setUserEmail('');
     setUserPlan('FREE');
+    setUserJourney(null);
     setSubScreen(null);
     setActiveTab('home');
     setAppScreen('login');
@@ -85,15 +88,19 @@ export default function App() {
     }
   };
 
-  // ── PRE-LOGIN SCREENS ──────────────────────────────────
+  // ── SPLASH ──────────────────────────────────────────────
 
   if (appScreen === 'splash') {
     return <SplashScreen onFinish={() => setAppScreen('onboarding')} />;
   }
 
+  // ── ONBOARDING ──────────────────────────────────────────
+
   if (appScreen === 'onboarding') {
     return <OnboardingScreen onFinish={() => setAppScreen('login')} />;
   }
+
+  // ── LOGIN ───────────────────────────────────────────────
 
   if (appScreen === 'login') {
     return (
@@ -104,6 +111,8 @@ export default function App() {
     );
   }
 
+  // ── SIGNUP ──────────────────────────────────────────────
+
   if (appScreen === 'signup') {
     return (
       <SignupScreen
@@ -113,33 +122,84 @@ export default function App() {
     );
   }
 
+  // ── DISCLAIMER ──────────────────────────────────────────
+
   if (appScreen === 'disclaimer') {
-    return <DisclaimerScreen onAccept={() => setAppScreen('main')} />;
+    return (
+      <DisclaimerScreen
+        onAccept={() => setAppScreen('journey')}
+      />
+    );
   }
 
-  // ── SUB SCREENS (shown over main app) ─────────────────
+  // ── JOURNEY SELECTOR ────────────────────────────────────
+
+  if (appScreen === 'journey') {
+    return (
+      <JourneyScreen
+        userName={userName}
+        onSelect={(journey) => {
+          setUserJourney(journey);
+          setAppScreen('main');
+        }}
+      />
+    );
+  }
+
+  // ── SUB SCREENS ─────────────────────────────────────────
 
   if (appScreen === 'main' && subScreen) {
     if (subScreen === 'tracker') {
-      return <TrackerScreen onBack={() => setSubScreen(null)} userPlan={userPlan} />;
+      return (
+        <TrackerScreen
+          onBack={() => setSubScreen(null)}
+          userPlan={userPlan}
+        />
+      );
     }
     if (subScreen === 'academy') {
-      return <AcademyScreen onBack={() => setSubScreen(null)} userPlan={userPlan} />;
+      return (
+        <AcademyScreen
+          onBack={() => setSubScreen(null)}
+          userPlan={userPlan}
+        />
+      );
     }
     if (subScreen === 'carefinder') {
-      return <CareFinderScreen onBack={() => setSubScreen(null)} userPlan={userPlan} />;
+      return (
+        <CareFinderScreen
+          onBack={() => setSubScreen(null)}
+          userPlan={userPlan}
+        />
+      );
     }
     if (subScreen === 'symptomchecker') {
-      return <SymptomCheckerScreen onBack={() => setSubScreen(null)} />;
+      return (
+        <SymptomCheckerScreen
+          onBack={() => setSubScreen(null)}
+        />
+      );
     }
     if (subScreen === 'nutrition') {
-      return <NutritionScreen onBack={() => setSubScreen(null)} />;
+      return (
+        <NutritionScreen
+          onBack={() => setSubScreen(null)}
+        />
+      );
     }
     if (subScreen === 'babynames') {
-      return <BabyNamesScreen onBack={() => setSubScreen(null)} />;
+      return (
+        <BabyNamesScreen
+          onBack={() => setSubScreen(null)}
+        />
+      );
     }
     if (subScreen === 'intimacy') {
-      return <IntimacyScreen onBack={() => setSubScreen(null)} />;
+      return (
+        <IntimacyScreen
+          onBack={() => setSubScreen(null)}
+        />
+      );
     }
     if (subScreen === 'subscription') {
       return (
@@ -151,7 +211,11 @@ export default function App() {
       );
     }
     if (subScreen === 'notifications') {
-      return <NotificationsScreen onBack={() => setSubScreen(null)} />;
+      return (
+        <NotificationsScreen
+          onBack={() => setSubScreen(null)}
+        />
+      );
     }
     if (subScreen === 'admin') {
       return (
@@ -163,7 +227,7 @@ export default function App() {
     }
   }
 
-  // ── MAIN APP WITH BOTTOM NAV ───────────────────────────
+  // ── MAIN APP WITH BOTTOM NAV ─────────────────────────────
 
   if (appScreen === 'main') {
     const renderTab = () => {
@@ -172,6 +236,7 @@ export default function App() {
           <HomeScreen
             userName={userName}
             userPlan={userPlan}
+            userJourney={userJourney}
             onNavigate={navigateTo}
           />
         );
@@ -189,6 +254,7 @@ export default function App() {
           <BellaScreen
             onBack={() => setActiveTab('home')}
             userPlan={userPlan}
+            userJourney={userJourney}
           />
         );
       }
@@ -208,6 +274,7 @@ export default function App() {
             userName={userName}
             userEmail={userEmail}
             userPlan={userPlan}
+            userJourney={userJourney}
             onLogout={handleLogout}
             onNavigate={navigateTo}
           />
@@ -262,8 +329,13 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
-  screenArea: { flex: 1 },
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+  },
+  screenArea: {
+    flex: 1,
+  },
   bottomNav: {
     backgroundColor: COLORS.white,
     borderTopWidth: 1,
@@ -295,7 +367,9 @@ const styles = StyleSheet.create({
   tabIconWrapActive: {
     backgroundColor: '#F2D7DF',
   },
-  tabEmoji: { fontSize: 22 },
+  tabEmoji: {
+    fontSize: 22,
+  },
   tabLabel: {
     fontSize: 11,
     fontWeight: '600',
@@ -305,5 +379,8 @@ const styles = StyleSheet.create({
     color: COLORS.primary,
     fontWeight: '700',
   },
-  fallback: { flex: 1, backgroundColor: '#FAF0F5' },
+  fallback: {
+    flex: 1,
+    backgroundColor: '#FAF0F5',
+  },
 });
