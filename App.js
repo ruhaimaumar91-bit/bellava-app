@@ -24,6 +24,7 @@ import SubscriptionScreen from './subscription';
 import ProfileScreen from './profile';
 import NotificationsScreen from './notifications';
 import AdminScreen from './admin';
+import PregnancyScreen from './pregnancy';
 
 const TABS = [
   { id: 'home', label: 'Home', emoji: '🏠' },
@@ -148,7 +149,15 @@ export default function App() {
 
   // ── SUB SCREENS ─────────────────────────────────────────
 
-  if (appScreen === 'main' && subScreen) {
+  if (appScreen === 'main' && subScreen) { 
+    if (subScreen === 'pregnancy') {
+  return (
+    <PregnancyScreen
+      onBack={() => setSubScreen(null)}
+    />
+  );
+}
+
     if (subScreen === 'tracker') {
       return (
         <TrackerScreen

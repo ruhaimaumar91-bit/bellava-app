@@ -18,6 +18,7 @@ const FEATURES = [
   { id: 'nutrition', emoji: '🥗', title: 'Nutrition', subtitle: 'Eat for your cycle', bg: '#F0FFE4', accent: '#7AC44A' },
   { id: 'symptomchecker', emoji: '🔍', title: 'Symptom Checker', subtitle: 'Check how you feel', bg: '#FFE4E4', accent: '#C44A4A' },
   { id: 'babynames', emoji: '👶', title: 'Baby Names', subtitle: 'Find the perfect name', bg: '#FFE4F4', accent: '#C44A90' },
+  { id: 'pregnancy', emoji: '🤰', title: 'Pregnancy Tracker', subtitle: 'Week by week guide', bg: '#F5EEFF', accent: '#9B59B6' },
   { id: 'intimacy', emoji: '💜', title: 'Intimacy Health', subtitle: 'Know your body', bg: '#F4E4FF', accent: '#9B59B6' },
   { id: 'notifications', emoji: '🔔', title: 'Notifications', subtitle: 'Your reminders', bg: '#FFFDE4', accent: '#C4B44A' },
   { id: 'subscription', emoji: '⭐', title: 'Upgrade', subtitle: 'Unlock all features', bg: '#FFF8E4', accent: '#F59E0B' },
