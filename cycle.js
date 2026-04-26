@@ -39,7 +39,7 @@ const JOURNEY_TIPS = {
   conceive: [
     { emoji: '🌱', tip: 'Track your LH surge with ovulation test strips for the most accurate fertile window detection.' },
     { emoji: '🌡️', tip: 'Take your basal body temperature every morning before getting up to spot your ovulation pattern.' },
-    { emoji: '🥗', tip: 'Folic acid (400mcg daily), iron and zinc support healthy fertility for both partners.' },
+    { emoji: '🥗', tip: 'Folic acid 400mcg daily, iron and zinc support healthy fertility for both partners.' },
     { emoji: '💜', tip: 'The TTC journey can be emotional. Be kind to yourself and lean on your support network.' },
   ],
   pregnant: [
@@ -123,17 +123,6 @@ export default function CycleScreen({ onBack, userPlan, userJourney }) {
     return 'normal';
   };
 
-  const getDayStyle = (type) => {
-    switch (type) {
-      case 'period': return { bg: '#FFE0E0', text: '#E74C3C', border: '#E74C3C' };
-      case 'ovulation': return { bg: '#FFF3CD', text: '#F39C12', border: '#F39C12' };
-      case 'fertile': return { bg: '#FFF9E6', text: '#F39C12', border: '#FFE0A0' };
-      case 'follicular': return { bg: '#E8F8EE', text: '#27AE60', border: 'transparent' };
-      case 'luteal': return { bg: '#F3E8FF', text: '#8E44AD', border: 'transparent' };
-      default: return { bg: 'transparent', text: COLORS.text, border: 'transparent' };
-    }
-  };
-
   const togglePeriodDay = (day) => {
     setPeriodDays(prev =>
       prev.includes(day) ? prev.filter(d => d !== day) : [...prev, day].sort((a, b) => a - b)
@@ -205,14 +194,15 @@ export default function CycleScreen({ onBack, userPlan, userJourney }) {
             <View style={styles.fertileWindowInfo}>
               <Text style={styles.fertileWindowTitle}>Fertile Window</Text>
               <Text style={styles.fertileWindowText}>
-                Days {ovulationDay - 2}–{ovulationDay + 1} are your most fertile days this cycle
+                Days {ovulationDay - 2}–{ovulationDay + 1} are your most fertile days
               </Text>
             </View>
           </View>
         )}
 
-        {/* Calendar */}
+        {/* Clean Calendar */}
         <View style={styles.calendarCard}>
+          {/* Month Navigation */}
           <View style={styles.monthNav}>
             <TouchableOpacity onPress={prevMonth} style={styles.navBtn}>
               <Text style={styles.navArrow}>‹</Text>
@@ -225,59 +215,87 @@ export default function CycleScreen({ onBack, userPlan, userJourney }) {
             </TouchableOpacity>
           </View>
 
+          {/* Day Headers */}
           <View style={styles.dayHeaders}>
             {DAYS_OF_WEEK.map(d => (
               <Text key={d} style={styles.dayHeader}>{d}</Text>
             ))}
           </View>
 
+          {/* Calendar Grid — Clean Design */}
           <View style={styles.calendarGrid}>
             {calendarDays.map((day, index) => {
-              if (!day) return <View key={`empty-${index}`} style={styles.calendarCell} />;
+              if (!day) return (
+                <View key={`empty-${index}`} style={styles.calendarCell} />
+              );
+
               const type = getDayType(day);
-              const dayStyle = getDayStyle(type);
               const isToday = day === today.getDate() &&
                 currentMonth === today.getMonth() &&
                 currentYear === today.getFullYear();
+              const isPeriod = type === 'period';
+              const isOvulation = type === 'ovulation';
+              const isFertile = type === 'fertile';
               const hasSymptoms = selectedSymptoms[day]?.length > 0;
 
               return (
                 <TouchableOpacity
                   key={day}
-                  style={[
-                    styles.calendarCell,
-                    {
-                      backgroundColor: dayStyle.bg,
-                      borderWidth: isToday ? 2 : dayStyle.border !== 'transparent' ? 1 : 0,
-                      borderColor: isToday ? journeyColor : dayStyle.border,
-                    },
-                  ]}
+                  style={styles.calendarCell}
                   onPress={() => {
                     setSelectedDay(day);
                     setShowDayModal(true);
                   }}
                 >
-                  <Text style={[styles.calendarDayText, { color: dayStyle.text }]}>
-                    {day}
-                  </Text>
-                  {type === 'period' && <Text style={styles.dayDot}>🔴</Text>}
-                  {type === 'ovulation' && <Text style={styles.dayDot}>✨</Text>}
-                  {(type === 'fertile' && journey === 'conceive') && <Text style={styles.dayDot}>🌱</Text>}
-                  {hasSymptoms && <Text style={styles.dayDot}>📝</Text>}
+                  {/* Day Circle */}
+                  <View style={[
+                    styles.dayCircle,
+                    isToday && { backgroundColor: journeyColor },
+                    isPeriod && !isToday && { backgroundColor: '#FFE8E8' },
+                    isOvulation && !isToday && { backgroundColor: '#FFF3CD' },
+                    isFertile && journey === 'conceive' && !isToday && { backgroundColor: '#E8F8EE' },
+                  ]}>
+                    <Text style={[
+                      styles.calendarDayText,
+                      isToday && { color: '#fff', fontWeight: '800' },
+                      isPeriod && !isToday && { color: '#E74C3C', fontWeight: '700' },
+                      isOvulation && !isToday && { color: '#F39C12', fontWeight: '700' },
+                      isFertile && journey === 'conceive' && !isToday && { color: '#27AE60', fontWeight: '700' },
+                    ]}>
+                      {day}
+                    </Text>
+                  </View>
+
+                  {/* Mini Dot Indicators */}
+                  <View style={styles.dotRow}>
+                    {isPeriod && (
+                      <View style={[styles.miniDot, { backgroundColor: '#E74C3C' }]} />
+                    )}
+                    {isOvulation && (
+                      <View style={[styles.miniDot, { backgroundColor: '#F39C12' }]} />
+                    )}
+                    {isFertile && journey === 'conceive' && (
+                      <View style={[styles.miniDot, { backgroundColor: '#27AE60' }]} />
+                    )}
+                    {hasSymptoms && (
+                      <View style={[styles.miniDot, { backgroundColor: journeyColor }]} />
+                    )}
+                  </View>
                 </TouchableOpacity>
               );
             })}
           </View>
 
+          {/* Clean Legend */}
           <View style={styles.legend}>
             {[
-              { color: '#E74C3C', label: 'Period', bg: '#FFE0E0' },
-              { color: '#F39C12', label: journey === 'conceive' ? 'Fertile' : 'Ovulation', bg: '#FFF3CD' },
-              { color: '#27AE60', label: 'Follicular', bg: '#E8F8EE' },
-              { color: '#8E44AD', label: 'Luteal', bg: '#F3E8FF' },
+              { color: '#E74C3C', label: 'Period' },
+              { color: '#F39C12', label: 'Ovulation' },
+              { color: '#27AE60', label: 'Fertile' },
+              { color: journeyColor, label: 'Today' },
             ].map(item => (
               <View key={item.label} style={styles.legendItem}>
-                <View style={[styles.legendDot, { backgroundColor: item.bg, borderColor: item.color }]} />
+                <View style={[styles.legendDot, { backgroundColor: item.color }]} />
                 <Text style={styles.legendText}>{item.label}</Text>
               </View>
             ))}
@@ -291,6 +309,7 @@ export default function CycleScreen({ onBack, userPlan, userJourney }) {
            journey === 'surrogacy' ? '👶 Surrogacy Support' :
            '💜 Cycle Tips'}
         </Text>
+
         {tips.map((tip, i) => (
           <View key={i} style={[styles.tipCard, { borderLeftColor: journeyColor }]}>
             <Text style={styles.tipEmoji}>{tip.emoji}</Text>
@@ -345,6 +364,7 @@ export default function CycleScreen({ onBack, userPlan, userJourney }) {
                       : '➕ Mark as period day'}
                   </Text>
                 </TouchableOpacity>
+
                 <Text style={styles.symptomsTitle}>Log symptoms:</Text>
                 <View style={styles.symptomsGrid}>
                   {PERIOD_SYMPTOMS.map(symptom => {
@@ -352,12 +372,15 @@ export default function CycleScreen({ onBack, userPlan, userJourney }) {
                     return (
                       <TouchableOpacity
                         key={symptom}
-                        style={[styles.symptomChip, isSelected && styles.symptomChipActive]}
+                        style={[
+                          styles.symptomChip,
+                          isSelected && { backgroundColor: COLORS.primaryLight, borderColor: journeyColor },
+                        ]}
                         onPress={() => toggleSymptom(selectedDay, symptom)}
                       >
                         <Text style={[
                           styles.symptomChipText,
-                          isSelected && { color: journeyColor },
+                          isSelected && { color: journeyColor, fontWeight: '700' },
                         ]}>
                           {symptom}
                         </Text>
@@ -417,43 +440,70 @@ const styles = StyleSheet.create({
   fertileWindowTitle: { fontSize: 15, fontWeight: '800', color: '#27AE60', marginBottom: 2 },
   fertileWindowText: { fontSize: 13, color: COLORS.textLight },
   calendarCard: {
-    backgroundColor: COLORS.white, borderRadius: 20,
-    padding: 16, marginBottom: 16,
-    shadowColor: '#000', shadowOpacity: 0.05,
-    shadowRadius: 10, elevation: 2,
+    backgroundColor: COLORS.white, borderRadius: 24,
+    padding: 20, marginBottom: 20,
+    shadowColor: '#000', shadowOpacity: 0.06,
+    shadowRadius: 16, elevation: 4,
   },
   monthNav: {
     flexDirection: 'row', alignItems: 'center',
-    justifyContent: 'space-between', marginBottom: 16,
+    justifyContent: 'space-between', marginBottom: 20,
   },
   navBtn: {
     width: 36, height: 36, borderRadius: 18,
     backgroundColor: COLORS.background,
     alignItems: 'center', justifyContent: 'center',
   },
-  navArrow: { fontSize: 22, color: COLORS.primary, fontWeight: '700' },
-  monthTitle: { fontSize: 17, fontWeight: '800', color: COLORS.text },
-  dayHeaders: { flexDirection: 'row', marginBottom: 8 },
+  navArrow: { fontSize: 24, color: COLORS.primary, fontWeight: '700' },
+  monthTitle: { fontSize: 18, fontWeight: '800', color: COLORS.text },
+  dayHeaders: {
+    flexDirection: 'row', marginBottom: 8,
+  },
   dayHeader: {
     flex: 1, textAlign: 'center',
-    fontSize: 12, fontWeight: '700', color: COLORS.textLight,
+    fontSize: 12, fontWeight: '700',
+    color: COLORS.textLight,
   },
-  calendarGrid: { flexDirection: 'row', flexWrap: 'wrap' },
-  calendarCell: {
-    width: '14.28%', aspectRatio: 1,
-    alignItems: 'center', justifyContent: 'center',
-    borderRadius: 10, marginBottom: 4,
-  },
-  calendarDayText: { fontSize: 14, fontWeight: '600' },
-  dayDot: { fontSize: 8, marginTop: 1 },
-  legend: {
+  calendarGrid: {
     flexDirection: 'row', flexWrap: 'wrap',
-    gap: 8, marginTop: 12, paddingTop: 12,
+  },
+  calendarCell: {
+    width: '14.28%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 4,
+  },
+  dayCircle: {
+    width: 36, height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  calendarDayText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: COLORS.text,
+  },
+  dotRow: {
+    flexDirection: 'row',
+    gap: 2,
+    height: 6,
+    alignItems: 'center',
+    marginTop: 1,
+  },
+  miniDot: {
+    width: 4, height: 4,
+    borderRadius: 2,
+  },
+  legend: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginTop: 16, paddingTop: 16,
     borderTopWidth: 1, borderTopColor: COLORS.border,
   },
   legendItem: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  legendDot: { width: 14, height: 14, borderRadius: 7, borderWidth: 1.5 },
-  legendText: { fontSize: 11, color: COLORS.textLight },
+  legendDot: { width: 8, height: 8, borderRadius: 4 },
+  legendText: { fontSize: 12, color: COLORS.textLight, fontWeight: '500' },
   sectionTitle: {
     fontSize: 17, fontWeight: '800',
     color: COLORS.text, marginBottom: 12, marginTop: 4,
@@ -508,7 +558,6 @@ const styles = StyleSheet.create({
     borderRadius: 50, backgroundColor: COLORS.background,
     borderWidth: 1.5, borderColor: COLORS.border,
   },
-  symptomChipActive: { backgroundColor: COLORS.primaryLight, borderColor: COLORS.primary },
   symptomChipText: { fontSize: 13, color: COLORS.textLight, fontWeight: '600' },
   closeBtn: {
     borderRadius: 50, paddingVertical: 14, alignItems: 'center',
