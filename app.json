@@ -1,0 +1,69 @@
+{
+  "expo": {
+    "name": "Bellava",
+    "slug": "bellava",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#C9748F"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.reinemande.bellava",
+      "buildNumber": "1.0.0",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Bellava uses your camera for profile photos.",
+        "NSPhotoLibraryUsageDescription": "Bellava accesses your photos for profile pictures.",
+        "NSFaceIDUsageDescription": "Bellava uses Face ID for secure admin access.",
+        "NSHealthShareUsageDescription": "Bellava reads health data to personalise your experience.",
+        "NSHealthUpdateUsageDescription": "Bellava saves health data to track your cycle."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#C9748F"
+      },
+      "package": "com.reinemande.bellava",
+      "versionCode": 1,
+      "permissions": [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "USE_BIOMETRIC",
+        "USE_FINGERPRINT"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "bellava-reinemande"
+      }
+    },
+    "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "deploymentTarget": "15.0"
+          },
+          "android": {
+            "compileSdkVersion": 34,
+            "targetSdkVersion": 34,
+            "buildToolsVersion": "34.0.0"
+          }
+        }
+      ]
+    ],
+    "owner": "reinemande"
+  }
+}
