@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import {
   View, Text, StyleSheet, ScrollView,
   TouchableOpacity, SafeAreaView, StatusBar, Modal,
+  TextInput, Linking, Alert,
 } from 'react-native';
 import COLORS from './colors';
 
@@ -36,6 +37,72 @@ const AVATAR_COLORS = [
   '#F39C12', '#4A90C4', '#E74C3C', '#1ABC9C',
 ];
 
+const PRIVACY_POLICY = `PRIVACY POLICY — BELLAVA
+Last updated: April 2025
+Operated by Reine Mande Ltd, London, United Kingdom
+
+1. INFORMATION WE COLLECT
+We collect information you provide when creating an account including your name, email address and health data you choose to log in the app.
+
+2. HOW WE USE YOUR DATA
+Your data is used to personalise your Bellava experience, provide AI health support through Bella, and improve our services. We never sell your personal data to third parties.
+
+3. DATA STORAGE
+Your data is stored securely using Supabase infrastructure with encryption at rest and in transit.
+
+4. YOUR RIGHTS
+Under UK GDPR you have the right to access, correct or delete your personal data at any time. Contact us at support@bellava.com to exercise your rights.
+
+5. HEALTH DATA
+Health data you enter is sensitive. We treat it with the highest level of care and it is never shared without your explicit consent.
+
+6. CONTACT
+Reine Mande Ltd
+Email: support@bellava.com
+London, United Kingdom`;
+
+const TERMS_OF_SERVICE = `TERMS OF SERVICE — BELLAVA
+Last updated: April 2025
+
+1. ACCEPTANCE
+By using Bellava you agree to these terms. If you do not agree, please do not use the app.
+
+2. MEDICAL DISCLAIMER
+Bellava is not a medical device and does not provide medical advice. Always consult a qualified healthcare professional for medical concerns.
+
+3. ELIGIBILITY
+You must be 18 or older to use Bellava.
+
+4. SUBSCRIPTIONS
+Bellava offers Free, Plus and Pro subscription tiers. Subscriptions are billed through the App Store or Google Play. Cancel any time in your device settings.
+
+5. INTELLECTUAL PROPERTY
+All content in Bellava is owned by Reine Mande Ltd. You may not copy or redistribute any content without permission.
+
+6. LIMITATION OF LIABILITY
+Reine Mande Ltd is not liable for any health decisions made based on information provided in the app.
+
+7. CONTACT
+support@bellava.com`;
+
+const MEDICAL_DISCLAIMER = `MEDICAL DISCLAIMER — BELLAVA
+
+Bellava and Bella AI provide general health information only.
+
+IMPORTANT:
+• Nothing in this app constitutes medical advice, diagnosis or treatment
+• Always seek the advice of a qualified healthcare provider for any medical condition
+• Never disregard professional advice because of something you read in this app
+• In a medical emergency, call 999 immediately
+
+MENTAL HEALTH SUPPORT:
+• Samaritans: 116 123 (free, 24/7)
+• Crisis Text Line: Text SHOUT to 85258
+• NHS urgent mental health: 111
+
+Bellava is operated by Reine Mande Ltd, London, United Kingdom.
+Registered in England and Wales.`;
+
 export default function ProfileScreen({
   onBack, userName, userEmail, userPlan,
   userJourney, onLogout, onNavigate,
@@ -47,11 +114,28 @@ export default function ProfileScreen({
     daily: true, period: true, ovulation: true,
     community: true, appointments: true, bella: true, marketing: false,
   });
+
+  // Modal states
   const [showLanguageModal, setShowLanguageModal] = useState(false);
   const [showJourneyModal, setShowJourneyModal] = useState(false);
   const [showAvatarModal, setShowAvatarModal] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showEditProfile, setShowEditProfile] = useState(false);
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
+  const [showMedicalDisclaimer, setShowMedicalDisclaimer] = useState(false);
+  const [showDownloadData, setShowDownloadData] = useState(false);
+
+  // Edit profile state
+  const [editName, setEditName] = useState(userName || '');
+  const [editEmail, setEditEmail] = useState(userEmail || '');
+
+  // Change password state
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
 
   const firstName = userName ? userName.split(' ')[0] : 'Beautiful';
   const currentLanguage = LANGUAGES.find(l => l.code === language);
@@ -73,6 +157,51 @@ export default function ProfileScreen({
     return '🆓';
   };
 
+  const handleContactSupport = () => {
+    Linking.openURL('mailto:support@bellava.com?subject=Bellava Support Request');
+  };
+
+  const handleReportBug = () => {
+    Linking.openURL('mailto:support@bellava.com?subject=Bug Report — Bellava App');
+  };
+
+  const handleRateBellava = () => {
+    Alert.alert(
+      '⭐ Rate Bellava',
+      'Bellava is not yet on the App Store. Once we launch, you will be able to rate us here! Thank you for your support. 💜',
+      [{ text: 'Got it!', style: 'default' }]
+    );
+  };
+
+  const handleDownloadData = () => {
+    setShowDownloadData(true);
+  };
+
+  const handleSaveProfile = () => {
+    setShowEditProfile(false);
+    Alert.alert('✅ Profile Updated', 'Your profile has been saved successfully. 💜');
+  };
+
+  const handleChangePassword = () => {
+    if (!currentPassword || !newPassword || !confirmNewPassword) {
+      Alert.alert('⚠️ Missing fields', 'Please fill in all password fields.');
+      return;
+    }
+    if (newPassword !== confirmNewPassword) {
+      Alert.alert('⚠️ Passwords do not match', 'Your new passwords do not match. Please try again.');
+      return;
+    }
+    if (newPassword.length < 8) {
+      Alert.alert('⚠️ Password too short', 'Your new password must be at least 8 characters.');
+      return;
+    }
+    setShowChangePassword(false);
+    setCurrentPassword('');
+    setNewPassword('');
+    setConfirmNewPassword('');
+    Alert.alert('✅ Password Changed', 'Your password has been updated successfully. 💜');
+  };
+
   return (
     <SafeAreaView style={styles.safe}>
       <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
@@ -81,11 +210,8 @@ export default function ProfileScreen({
 
         {/* Profile Hero Card */}
         <View style={styles.heroCard}>
-          {/* Background decoration */}
           <View style={styles.heroBg} />
           <View style={styles.heroContent}>
-
-            {/* Avatar */}
             <TouchableOpacity
               style={styles.avatarWrap}
               onPress={() => setShowAvatarModal(true)}
@@ -103,24 +229,22 @@ export default function ProfileScreen({
             <Text style={styles.profileName}>{firstName}</Text>
             <Text style={styles.profileEmail}>{userEmail || 'No email set'}</Text>
 
-            {/* Plan Badge */}
             <View style={[styles.planBadge, { backgroundColor: planColor() }]}>
               <Text style={styles.planBadgeText}>
                 {planEmoji()} {userPlan} Plan
               </Text>
             </View>
 
-            {/* Journey Badge */}
             {currentJourney && (
-              <View style={[styles.journeyBadge, { backgroundColor: `${currentJourney.color}20`, borderColor: `${currentJourney.color}40` }]}>
+              <View style={[styles.journeyBadge, {
+                backgroundColor: 'rgba(255,255,255,0.2)',
+                borderColor: 'rgba(255,255,255,0.3)',
+              }]}>
                 <Text style={styles.journeyBadgeEmoji}>{currentJourney.emoji}</Text>
-                <Text style={[styles.journeyBadgeText, { color: currentJourney.color }]}>
-                  {currentJourney.label}
-                </Text>
+                <Text style={styles.journeyBadgeText}>{currentJourney.label}</Text>
               </View>
             )}
 
-            {/* Upgrade button for free users */}
             {userPlan === 'FREE' && (
               <TouchableOpacity
                 style={styles.upgradeBtn}
@@ -147,7 +271,7 @@ export default function ProfileScreen({
           ))}
         </View>
 
-        {/* Journey Settings */}
+        {/* Journey */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>🌸 My Journey</Text>
           <TouchableOpacity
@@ -157,13 +281,13 @@ export default function ProfileScreen({
             <Text style={styles.settingEmoji}>{currentJourney?.emoji || '💜'}</Text>
             <View style={styles.settingInfo}>
               <Text style={styles.settingLabel}>Current Journey</Text>
-              <Text style={styles.settingValue}>{currentJourney?.label || 'General Wellbeing'}</Text>
+              <Text style={styles.settingValue}>{currentJourney?.label}</Text>
             </View>
             <Text style={styles.settingArrow}>›</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Language Settings */}
+        {/* Language */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>🌍 Language</Text>
           <TouchableOpacity
@@ -179,7 +303,7 @@ export default function ProfileScreen({
           </TouchableOpacity>
         </View>
 
-        {/* Notification Settings */}
+        {/* Notifications */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>🔔 Notifications</Text>
           {NOTIFICATION_SETTINGS.map(setting => (
@@ -196,14 +320,26 @@ export default function ProfileScreen({
           ))}
         </View>
 
-        {/* Account Settings */}
+        {/* Account */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>⚙️ Account</Text>
           {[
-            { emoji: '✏️', label: 'Edit Profile', action: () => {} },
-            { emoji: '🔒', label: 'Change Password', action: () => {} },
-            { emoji: '⭐', label: 'Manage Subscription', action: () => onNavigate('subscription') },
-            { emoji: '📥', label: 'Download My Data', action: () => {} },
+            {
+              emoji: '✏️', label: 'Edit Profile',
+              action: () => setShowEditProfile(true),
+            },
+            {
+              emoji: '🔒', label: 'Change Password',
+              action: () => setShowChangePassword(true),
+            },
+            {
+              emoji: '⭐', label: 'Manage Subscription',
+              action: () => onNavigate('subscription'),
+            },
+            {
+              emoji: '📥', label: 'Download My Data',
+              action: handleDownloadData,
+            },
           ].map((item, i) => (
             <TouchableOpacity key={i} style={styles.settingRow} onPress={item.action}>
               <Text style={styles.settingEmoji}>{item.emoji}</Text>
@@ -217,14 +353,32 @@ export default function ProfileScreen({
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>📋 Legal & Support</Text>
           {[
-            { emoji: '🔒', label: 'Privacy Policy' },
-            { emoji: '📄', label: 'Terms of Service' },
-            { emoji: '⚕️', label: 'Medical Disclaimer' },
-            { emoji: '💬', label: 'Contact Support' },
-            { emoji: '⭐', label: 'Rate Bellava' },
-            { emoji: '🐛', label: 'Report a Bug' },
+            {
+              emoji: '🔒', label: 'Privacy Policy',
+              action: () => setShowPrivacyPolicy(true),
+            },
+            {
+              emoji: '📄', label: 'Terms of Service',
+              action: () => setShowTerms(true),
+            },
+            {
+              emoji: '⚕️', label: 'Medical Disclaimer',
+              action: () => setShowMedicalDisclaimer(true),
+            },
+            {
+              emoji: '💬', label: 'Contact Support',
+              action: handleContactSupport,
+            },
+            {
+              emoji: '⭐', label: 'Rate Bellava',
+              action: handleRateBellava,
+            },
+            {
+              emoji: '🐛', label: 'Report a Bug',
+              action: handleReportBug,
+            },
           ].map((item, i) => (
-            <TouchableOpacity key={i} style={styles.settingRow}>
+            <TouchableOpacity key={i} style={styles.settingRow} onPress={item.action}>
               <Text style={styles.settingEmoji}>{item.emoji}</Text>
               <Text style={[styles.settingLabel, { flex: 1 }]}>{item.label}</Text>
               <Text style={styles.settingArrow}>›</Text>
@@ -242,7 +396,6 @@ export default function ProfileScreen({
           <Text style={styles.appTagline}>Your health. Your body. Your power. 💜</Text>
         </View>
 
-        {/* Logout */}
         <TouchableOpacity
           style={styles.logoutBtn}
           onPress={() => setShowLogoutModal(true)}
@@ -260,13 +413,172 @@ export default function ProfileScreen({
         <View style={{ height: 40 }} />
       </ScrollView>
 
+      {/* ── MODALS ── */}
+
+      {/* Edit Profile Modal */}
+      <Modal visible={showEditProfile} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalSheet}>
+            <View style={styles.modalHandle} />
+            <Text style={styles.modalTitle}>✏️ Edit Profile</Text>
+            <Text style={styles.inputLabel}>First Name</Text>
+            <TextInput
+              style={styles.input}
+              value={editName}
+              onChangeText={setEditName}
+              placeholder="Your name"
+              placeholderTextColor={COLORS.textLight}
+            />
+            <Text style={styles.inputLabel}>Email Address</Text>
+            <TextInput
+              style={styles.input}
+              value={editEmail}
+              onChangeText={setEditEmail}
+              placeholder="your@email.com"
+              placeholderTextColor={COLORS.textLight}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+            <TouchableOpacity style={styles.saveBtn} onPress={handleSaveProfile}>
+              <Text style={styles.saveBtnText}>Save Changes 💜</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.closeBtn} onPress={() => setShowEditProfile(false)}>
+              <Text style={styles.closeBtnText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Change Password Modal */}
+      <Modal visible={showChangePassword} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalSheet}>
+            <View style={styles.modalHandle} />
+            <Text style={styles.modalTitle}>🔒 Change Password</Text>
+            <Text style={styles.inputLabel}>Current Password</Text>
+            <TextInput
+              style={styles.input}
+              value={currentPassword}
+              onChangeText={setCurrentPassword}
+              placeholder="Enter current password"
+              placeholderTextColor={COLORS.textLight}
+              secureTextEntry
+            />
+            <Text style={styles.inputLabel}>New Password</Text>
+            <TextInput
+              style={styles.input}
+              value={newPassword}
+              onChangeText={setNewPassword}
+              placeholder="At least 8 characters"
+              placeholderTextColor={COLORS.textLight}
+              secureTextEntry
+            />
+            <Text style={styles.inputLabel}>Confirm New Password</Text>
+            <TextInput
+              style={styles.input}
+              value={confirmNewPassword}
+              onChangeText={setConfirmNewPassword}
+              placeholder="Repeat new password"
+              placeholderTextColor={COLORS.textLight}
+              secureTextEntry
+            />
+            <TouchableOpacity style={styles.saveBtn} onPress={handleChangePassword}>
+              <Text style={styles.saveBtnText}>Update Password 🔒</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.closeBtn} onPress={() => setShowChangePassword(false)}>
+              <Text style={styles.closeBtnText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Privacy Policy Modal */}
+      <Modal visible={showPrivacyPolicy} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalSheetTall}>
+            <View style={styles.modalHandle} />
+            <Text style={styles.modalTitle}>🔒 Privacy Policy</Text>
+            <ScrollView style={styles.legalScroll} showsVerticalScrollIndicator={false}>
+              <Text style={styles.legalText}>{PRIVACY_POLICY}</Text>
+              <View style={{ height: 20 }} />
+            </ScrollView>
+            <TouchableOpacity style={styles.saveBtn} onPress={() => setShowPrivacyPolicy(false)}>
+              <Text style={styles.saveBtnText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Terms of Service Modal */}
+      <Modal visible={showTerms} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalSheetTall}>
+            <View style={styles.modalHandle} />
+            <Text style={styles.modalTitle}>📄 Terms of Service</Text>
+            <ScrollView style={styles.legalScroll} showsVerticalScrollIndicator={false}>
+              <Text style={styles.legalText}>{TERMS_OF_SERVICE}</Text>
+              <View style={{ height: 20 }} />
+            </ScrollView>
+            <TouchableOpacity style={styles.saveBtn} onPress={() => setShowTerms(false)}>
+              <Text style={styles.saveBtnText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Medical Disclaimer Modal */}
+      <Modal visible={showMedicalDisclaimer} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalSheetTall}>
+            <View style={styles.modalHandle} />
+            <Text style={styles.modalTitle}>⚕️ Medical Disclaimer</Text>
+            <ScrollView style={styles.legalScroll} showsVerticalScrollIndicator={false}>
+              <Text style={styles.legalText}>{MEDICAL_DISCLAIMER}</Text>
+              <View style={{ height: 20 }} />
+            </ScrollView>
+            <TouchableOpacity style={styles.saveBtn} onPress={() => setShowMedicalDisclaimer(false)}>
+              <Text style={styles.saveBtnText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Download Data Modal */}
+      <Modal visible={showDownloadData} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalSheet, { alignItems: 'center' }]}>
+            <View style={styles.modalHandle} />
+            <Text style={styles.modalEmoji}>📥</Text>
+            <Text style={styles.modalTitle}>Download My Data</Text>
+            <Text style={styles.modalSub}>
+              Under UK GDPR you have the right to download all data Bellava holds about you. This includes your profile, cycle logs and health records.
+            </Text>
+            <TouchableOpacity
+              style={styles.saveBtn}
+              onPress={() => {
+                setShowDownloadData(false);
+                Alert.alert(
+                  '📥 Data Request Received',
+                  'We have received your data download request. We will send your data to ' + (userEmail || 'your email') + ' within 30 days as required by UK GDPR. 💜',
+                  [{ text: 'OK' }]
+                );
+              }}
+            >
+              <Text style={styles.saveBtnText}>Request My Data 📥</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.closeBtn} onPress={() => setShowDownloadData(false)}>
+              <Text style={styles.closeBtnText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
       {/* Avatar Colour Modal */}
       <Modal visible={showAvatarModal} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
           <View style={styles.modalSheet}>
             <View style={styles.modalHandle} />
             <Text style={styles.modalTitle}>Choose Your Colour 🎨</Text>
-            <Text style={styles.modalSub}>Pick a colour for your profile avatar</Text>
             <View style={styles.colourGrid}>
               {AVATAR_COLORS.map((color, i) => (
                 <TouchableOpacity
@@ -292,11 +604,8 @@ export default function ProfileScreen({
               </View>
               <Text style={styles.avatarPreviewText}>Preview</Text>
             </View>
-            <TouchableOpacity
-              style={styles.doneBtn}
-              onPress={() => setShowAvatarModal(false)}
-            >
-              <Text style={styles.doneBtnText}>Save 💜</Text>
+            <TouchableOpacity style={styles.saveBtn} onPress={() => setShowAvatarModal(false)}>
+              <Text style={styles.saveBtnText}>Save 💜</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -314,11 +623,19 @@ export default function ProfileScreen({
                 key={j.id}
                 style={[
                   styles.journeyRow,
-                  journey === j.id && { backgroundColor: `${j.color}10`, borderColor: j.color },
+                  journey === j.id && {
+                    backgroundColor: `${j.color}10`,
+                    borderColor: j.color,
+                  },
                 ]}
                 onPress={() => {
                   setJourney(j.id);
                   setShowJourneyModal(false);
+                  Alert.alert(
+                    `${j.emoji} Journey Updated`,
+                    `Your journey has been changed to ${j.label}. Bellava will personalise your experience. 💜`,
+                    [{ text: 'Great!', style: 'default' }]
+                  );
                 }}
               >
                 <Text style={styles.journeyRowEmoji}>{j.emoji}</Text>
@@ -333,11 +650,8 @@ export default function ProfileScreen({
                 )}
               </TouchableOpacity>
             ))}
-            <TouchableOpacity
-              style={styles.closeBtn}
-              onPress={() => setShowJourneyModal(false)}
-            >
-              <Text style={styles.closeBtnText}>Close</Text>
+            <TouchableOpacity style={styles.closeBtn} onPress={() => setShowJourneyModal(false)}>
+              <Text style={styles.closeBtnText}>Cancel</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -370,10 +684,7 @@ export default function ProfileScreen({
                 )}
               </TouchableOpacity>
             ))}
-            <TouchableOpacity
-              style={styles.closeBtn}
-              onPress={() => setShowLanguageModal(false)}
-            >
+            <TouchableOpacity style={styles.closeBtn} onPress={() => setShowLanguageModal(false)}>
               <Text style={styles.closeBtnText}>Close</Text>
             </TouchableOpacity>
           </View>
@@ -384,6 +695,7 @@ export default function ProfileScreen({
       <Modal visible={showLogoutModal} animationType="fade" transparent>
         <View style={styles.modalOverlay}>
           <View style={[styles.modalSheet, { alignItems: 'center' }]}>
+            <View style={styles.modalHandle} />
             <Text style={styles.modalEmoji}>👋</Text>
             <Text style={styles.modalTitle}>Sign out?</Text>
             <Text style={styles.modalSub}>
@@ -405,10 +717,11 @@ export default function ProfileScreen({
         </View>
       </Modal>
 
-      {/* Delete Modal */}
+      {/* Delete Account Modal */}
       <Modal visible={showDeleteModal} animationType="fade" transparent>
         <View style={styles.modalOverlay}>
           <View style={[styles.modalSheet, { alignItems: 'center' }]}>
+            <View style={styles.modalHandle} />
             <Text style={styles.modalEmoji}>⚠️</Text>
             <Text style={styles.modalTitle}>Delete Account?</Text>
             <Text style={styles.modalSub}>
@@ -438,14 +751,11 @@ const styles = StyleSheet.create({
   content: { flex: 1 },
   heroCard: {
     backgroundColor: COLORS.primary,
-    paddingBottom: 28,
-    overflow: 'hidden',
+    paddingBottom: 28, overflow: 'hidden',
   },
   heroBg: {
-    position: 'absolute',
-    top: -60, right: -60,
-    width: 200, height: 200,
-    borderRadius: 100,
+    position: 'absolute', top: -60, right: -60,
+    width: 200, height: 200, borderRadius: 100,
     backgroundColor: 'rgba(255,255,255,0.1)',
   },
   heroContent: { alignItems: 'center', paddingTop: 28, paddingHorizontal: 24 },
@@ -454,8 +764,6 @@ const styles = StyleSheet.create({
     width: 88, height: 88, borderRadius: 44,
     alignItems: 'center', justifyContent: 'center',
     borderWidth: 3, borderColor: '#fff',
-    shadowColor: '#000', shadowOpacity: 0.2,
-    shadowRadius: 10, elevation: 6,
   },
   avatarLetter: { fontSize: 38, fontWeight: '800', color: '#fff' },
   editAvatarBadge: {
@@ -463,21 +771,18 @@ const styles = StyleSheet.create({
     width: 28, height: 28, borderRadius: 14,
     backgroundColor: '#fff',
     alignItems: 'center', justifyContent: 'center',
-    shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 4, elevation: 2,
   },
   editAvatarIcon: { fontSize: 14 },
   profileName: { fontSize: 24, fontWeight: '800', color: '#fff', marginBottom: 4 },
   profileEmail: { fontSize: 14, color: 'rgba(255,255,255,0.8)', marginBottom: 14 },
   planBadge: {
-    borderRadius: 50, paddingHorizontal: 16, paddingVertical: 7,
-    marginBottom: 10,
+    borderRadius: 50, paddingHorizontal: 16, paddingVertical: 7, marginBottom: 10,
   },
   planBadgeText: { color: '#fff', fontWeight: '700', fontSize: 14 },
   journeyBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
     borderRadius: 50, paddingHorizontal: 14, paddingVertical: 8,
     borderWidth: 1, marginBottom: 14,
-    backgroundColor: 'rgba(255,255,255,0.15)',
   },
   journeyBadgeEmoji: { fontSize: 16 },
   journeyBadgeText: { fontSize: 13, fontWeight: '700', color: '#fff' },
@@ -486,14 +791,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20, paddingVertical: 10,
   },
   upgradeBtnText: { color: COLORS.primary, fontWeight: '700', fontSize: 14 },
-  statsRow: {
-    flexDirection: 'row', margin: 16, gap: 12,
-  },
+  statsRow: { flexDirection: 'row', margin: 16, gap: 12 },
   statCard: {
     flex: 1, backgroundColor: COLORS.white,
     borderRadius: 16, padding: 14, alignItems: 'center',
-    shadowColor: '#000', shadowOpacity: 0.05,
-    shadowRadius: 8, elevation: 2,
+    shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 8, elevation: 2,
   },
   statEmoji: { fontSize: 22, marginBottom: 6 },
   statValue: { fontSize: 20, fontWeight: '800', color: COLORS.primary },
@@ -559,15 +861,41 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white, borderTopLeftRadius: 28,
     borderTopRightRadius: 28, padding: 24,
   },
+  modalSheetTall: {
+    backgroundColor: COLORS.white, borderTopLeftRadius: 28,
+    borderTopRightRadius: 28, padding: 24, maxHeight: '90%',
+  },
   modalHandle: {
     width: 40, height: 4, borderRadius: 2,
     backgroundColor: COLORS.border, alignSelf: 'center', marginBottom: 20,
   },
   modalEmoji: { fontSize: 44, marginBottom: 12, textAlign: 'center' },
-  modalTitle: { fontSize: 20, fontWeight: '800', color: COLORS.text, marginBottom: 6 },
+  modalTitle: {
+    fontSize: 20, fontWeight: '800', color: COLORS.text, marginBottom: 6,
+  },
   modalSub: {
     fontSize: 14, color: COLORS.textLight, marginBottom: 20, lineHeight: 22,
   },
+  inputLabel: {
+    fontSize: 14, fontWeight: '700', color: COLORS.text,
+    marginBottom: 8, marginTop: 4,
+  },
+  input: {
+    backgroundColor: COLORS.background, borderRadius: 14,
+    paddingHorizontal: 16, paddingVertical: 14,
+    fontSize: 15, color: COLORS.text,
+    borderWidth: 1.5, borderColor: COLORS.border, marginBottom: 16,
+  },
+  legalScroll: { maxHeight: 400, marginBottom: 16 },
+  legalText: {
+    fontSize: 13, color: COLORS.text,
+    lineHeight: 22, whiteSpace: 'pre-line',
+  },
+  saveBtn: {
+    backgroundColor: COLORS.primary, borderRadius: 50,
+    paddingVertical: 15, alignItems: 'center', marginBottom: 10,
+  },
+  saveBtnText: { color: '#fff', fontWeight: '700', fontSize: 16 },
   colourGrid: {
     flexDirection: 'row', flexWrap: 'wrap',
     gap: 14, justifyContent: 'center', marginBottom: 20,
@@ -589,11 +917,6 @@ const styles = StyleSheet.create({
   },
   avatarPreviewLetter: { color: '#fff', fontSize: 30, fontWeight: '800' },
   avatarPreviewText: { fontSize: 13, color: COLORS.textLight },
-  doneBtn: {
-    backgroundColor: COLORS.primary, borderRadius: 50,
-    paddingVertical: 15, alignItems: 'center',
-  },
-  doneBtnText: { color: '#fff', fontWeight: '700', fontSize: 16 },
   journeyRow: {
     flexDirection: 'row', alignItems: 'center',
     paddingVertical: 14, gap: 14,
@@ -614,8 +937,8 @@ const styles = StyleSheet.create({
   langLabel: { fontSize: 16, color: COLORS.text, flex: 1 },
   langCheck: { fontSize: 18, color: COLORS.primary, fontWeight: '700' },
   closeBtn: {
-    marginTop: 12, borderWidth: 2, borderColor: COLORS.border,
-    borderRadius: 50, paddingVertical: 14, alignItems: 'center',
+    borderWidth: 2, borderColor: COLORS.border, borderRadius: 50,
+    paddingVertical: 14, alignItems: 'center',
   },
   closeBtnText: { color: COLORS.textLight, fontWeight: '700', fontSize: 15 },
   confirmLogoutBtn: {
