@@ -18,8 +18,8 @@ const FEATURES = [
   { id: 'nutrition', emoji: '🥗', title: 'Nutrition', subtitle: 'Eat for your cycle', bg: '#F0FFE4', accent: '#7AC44A' },
   { id: 'symptomchecker', emoji: '🔍', title: 'Symptom Checker', subtitle: 'Check how you feel', bg: '#FFE4E4', accent: '#C44A4A' },
   { id: 'babynames', emoji: '👶', title: 'Baby Names', subtitle: 'Find the perfect name', bg: '#FFE4F4', accent: '#C44A90' },
-  { id: 'pregnancy', emoji: '🤰', title: 'Pregnancy Tracker', subtitle: 'Week by week guide', bg: '#F5EEFF', accent: '#9B59B6' },
   { id: 'intimacy', emoji: '💜', title: 'Intimacy Health', subtitle: 'Know your body', bg: '#F4E4FF', accent: '#9B59B6' },
+  { id: 'pregnancy', emoji: '🤰', title: 'Pregnancy Tracker', subtitle: 'Week by week guide', bg: '#F5EEFF', accent: '#9B59B6' },
   { id: 'notifications', emoji: '🔔', title: 'Notifications', subtitle: 'Your reminders', bg: '#FFFDE4', accent: '#C4B44A' },
   { id: 'subscription', emoji: '⭐', title: 'Upgrade', subtitle: 'Unlock all features', bg: '#FFF8E4', accent: '#F59E0B' },
 ];
@@ -52,9 +52,9 @@ const JOURNEY_CONTENT = {
     color: '#9B59B6',
     bg: '#F5EEFF',
     quickActions: [
+      { id: 'pregnancy', emoji: '🤰', label: 'Pregnancy' },
       { id: 'tracker', emoji: '📊', label: 'Symptoms' },
       { id: 'bella', emoji: '🤖', label: 'Ask Bella' },
-      { id: 'academy', emoji: '📚', label: 'Learn' },
       { id: 'carefinder', emoji: '🏥', label: 'Care' },
     ],
   },
@@ -250,7 +250,9 @@ export default function HomeScreen({ userName, userPlan, userJourney, onNavigate
             {journey.quickActions.map((action, index) => (
               <TouchableOpacity
                 key={index}
-                style={[styles.quickCard, { backgroundColor: FEATURES.find(f => f.id === action.id)?.bg || '#F0F0F0' }]}
+                style={[styles.quickCard, {
+                  backgroundColor: FEATURES.find(f => f.id === action.id)?.bg || '#F0F0F0',
+                }]}
                 onPress={() => onNavigate(action.id)}
               >
                 <Text style={styles.quickEmoji}>{action.emoji}</Text>
@@ -279,14 +281,6 @@ export default function HomeScreen({ userName, userPlan, userJourney, onNavigate
             ))}
           </View>
         </View>
-
-        {/* Admin button */}
-        <TouchableOpacity
-          style={styles.adminBtn}
-          onPress={() => onNavigate('admin')}
-        >
-          <Text style={styles.adminBtnText}>⚙️</Text>
-        </TouchableOpacity>
 
         <View style={{ height: 40 }} />
       </Animated.ScrollView>
@@ -405,12 +399,4 @@ const styles = StyleSheet.create({
   featureEmoji: { fontSize: 28, marginBottom: 8 },
   featureTitle: { fontSize: 14, fontWeight: '800', marginBottom: 4 },
   featureSubtitle: { fontSize: 12, color: COLORS.textLight },
-  adminBtn: {
-    alignSelf: 'center', marginTop: 20,
-    width: 40, height: 40, borderRadius: 20,
-    backgroundColor: COLORS.background,
-    alignItems: 'center', justifyContent: 'center',
-    borderWidth: 1, borderColor: COLORS.border,
-  },
-  adminBtnText: { fontSize: 18 },
 });

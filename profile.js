@@ -100,8 +100,7 @@ MENTAL HEALTH SUPPORT:
 • Crisis Text Line: Text SHOUT to 85258
 • NHS urgent mental health: 111
 
-Bellava is operated by Reine Mande Ltd, London, United Kingdom.
-Registered in England and Wales.`;
+Bellava is operated by Reine Mande Ltd, London, United Kingdom.`;
 
 export default function ProfileScreen({
   onBack, userName, userEmail, userPlan,
@@ -110,12 +109,12 @@ export default function ProfileScreen({
   const [language, setLanguage] = useState('en');
   const [journey, setJourney] = useState(userJourney || 'wellbeing');
   const [avatarColor, setAvatarColor] = useState(COLORS.primary);
+  const [tapCount, setTapCount] = useState(0);
   const [notifications, setNotifications] = useState({
     daily: true, period: true, ovulation: true,
     community: true, appointments: true, bella: true, marketing: false,
   });
 
-  // Modal states
   const [showLanguageModal, setShowLanguageModal] = useState(false);
   const [showJourneyModal, setShowJourneyModal] = useState(false);
   const [showAvatarModal, setShowAvatarModal] = useState(false);
@@ -128,11 +127,8 @@ export default function ProfileScreen({
   const [showMedicalDisclaimer, setShowMedicalDisclaimer] = useState(false);
   const [showDownloadData, setShowDownloadData] = useState(false);
 
-  // Edit profile state
   const [editName, setEditName] = useState(userName || '');
   const [editEmail, setEditEmail] = useState(userEmail || '');
-
-  // Change password state
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
@@ -157,6 +153,20 @@ export default function ProfileScreen({
     return '🆓';
   };
 
+  const handleSecretTap = () => {
+    setTapCount(prev => {
+      const next = prev + 1;
+      if (next >= 5) {
+        onNavigate('admin');
+        return 0;
+      }
+      if (next === 3) {
+        Alert.alert('💜', 'Almost there...');
+      }
+      return next;
+    });
+  };
+
   const handleContactSupport = () => {
     Linking.openURL('mailto:support@bellava.com?subject=Bellava Support Request');
   };
@@ -173,10 +183,6 @@ export default function ProfileScreen({
     );
   };
 
-  const handleDownloadData = () => {
-    setShowDownloadData(true);
-  };
-
   const handleSaveProfile = () => {
     setShowEditProfile(false);
     Alert.alert('✅ Profile Updated', 'Your profile has been saved successfully. 💜');
@@ -188,7 +194,7 @@ export default function ProfileScreen({
       return;
     }
     if (newPassword !== confirmNewPassword) {
-      Alert.alert('⚠️ Passwords do not match', 'Your new passwords do not match. Please try again.');
+      Alert.alert('⚠️ Passwords do not match', 'Your new passwords do not match.');
       return;
     }
     if (newPassword.length < 8) {
@@ -199,7 +205,7 @@ export default function ProfileScreen({
     setCurrentPassword('');
     setNewPassword('');
     setConfirmNewPassword('');
-    Alert.alert('✅ Password Changed', 'Your password has been updated successfully. 💜');
+    Alert.alert('✅ Password Changed', 'Your password has been updated. 💜');
   };
 
   return (
@@ -236,10 +242,7 @@ export default function ProfileScreen({
             </View>
 
             {currentJourney && (
-              <View style={[styles.journeyBadge, {
-                backgroundColor: 'rgba(255,255,255,0.2)',
-                borderColor: 'rgba(255,255,255,0.3)',
-              }]}>
+              <View style={styles.journeyBadge}>
                 <Text style={styles.journeyBadgeEmoji}>{currentJourney.emoji}</Text>
                 <Text style={styles.journeyBadgeText}>{currentJourney.label}</Text>
               </View>
@@ -324,22 +327,10 @@ export default function ProfileScreen({
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>⚙️ Account</Text>
           {[
-            {
-              emoji: '✏️', label: 'Edit Profile',
-              action: () => setShowEditProfile(true),
-            },
-            {
-              emoji: '🔒', label: 'Change Password',
-              action: () => setShowChangePassword(true),
-            },
-            {
-              emoji: '⭐', label: 'Manage Subscription',
-              action: () => onNavigate('subscription'),
-            },
-            {
-              emoji: '📥', label: 'Download My Data',
-              action: handleDownloadData,
-            },
+            { emoji: '✏️', label: 'Edit Profile', action: () => setShowEditProfile(true) },
+            { emoji: '🔒', label: 'Change Password', action: () => setShowChangePassword(true) },
+            { emoji: '⭐', label: 'Manage Subscription', action: () => onNavigate('subscription') },
+            { emoji: '📥', label: 'Download My Data', action: () => setShowDownloadData(true) },
           ].map((item, i) => (
             <TouchableOpacity key={i} style={styles.settingRow} onPress={item.action}>
               <Text style={styles.settingEmoji}>{item.emoji}</Text>
@@ -353,30 +344,12 @@ export default function ProfileScreen({
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>📋 Legal & Support</Text>
           {[
-            {
-              emoji: '🔒', label: 'Privacy Policy',
-              action: () => setShowPrivacyPolicy(true),
-            },
-            {
-              emoji: '📄', label: 'Terms of Service',
-              action: () => setShowTerms(true),
-            },
-            {
-              emoji: '⚕️', label: 'Medical Disclaimer',
-              action: () => setShowMedicalDisclaimer(true),
-            },
-            {
-              emoji: '💬', label: 'Contact Support',
-              action: handleContactSupport,
-            },
-            {
-              emoji: '⭐', label: 'Rate Bellava',
-              action: handleRateBellava,
-            },
-            {
-              emoji: '🐛', label: 'Report a Bug',
-              action: handleReportBug,
-            },
+            { emoji: '🔒', label: 'Privacy Policy', action: () => setShowPrivacyPolicy(true) },
+            { emoji: '📄', label: 'Terms of Service', action: () => setShowTerms(true) },
+            { emoji: '⚕️', label: 'Medical Disclaimer', action: () => setShowMedicalDisclaimer(true) },
+            { emoji: '💬', label: 'Contact Support', action: handleContactSupport },
+            { emoji: '⭐', label: 'Rate Bellava', action: handleRateBellava },
+            { emoji: '🐛', label: 'Report a Bug', action: handleReportBug },
           ].map((item, i) => (
             <TouchableOpacity key={i} style={styles.settingRow} onPress={item.action}>
               <Text style={styles.settingEmoji}>{item.emoji}</Text>
@@ -386,11 +359,16 @@ export default function ProfileScreen({
           ))}
         </View>
 
-        {/* App Info */}
+        {/* App Info — Secret Admin Access */}
         <View style={styles.appInfo}>
-          <View style={styles.appLogoSmall}>
-            <Text style={styles.appLogoLetter}>B</Text>
-          </View>
+          <TouchableOpacity
+            onPress={handleSecretTap}
+            activeOpacity={1}
+          >
+            <View style={styles.appLogoSmall}>
+              <Text style={styles.appLogoLetter}>B</Text>
+            </View>
+          </TouchableOpacity>
           <Text style={styles.appName}>Bellava</Text>
           <Text style={styles.appVersion}>Version 1.0.0 — by Reine Mande Ltd</Text>
           <Text style={styles.appTagline}>Your health. Your body. Your power. 💜</Text>
@@ -412,8 +390,6 @@ export default function ProfileScreen({
 
         <View style={{ height: 40 }} />
       </ScrollView>
-
-      {/* ── MODALS ── */}
 
       {/* Edit Profile Modal */}
       <Modal visible={showEditProfile} animationType="slide" transparent>
@@ -509,7 +485,7 @@ export default function ProfileScreen({
         </View>
       </Modal>
 
-      {/* Terms of Service Modal */}
+      {/* Terms Modal */}
       <Modal visible={showTerms} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
           <View style={styles.modalSheetTall}>
@@ -551,15 +527,15 @@ export default function ProfileScreen({
             <Text style={styles.modalEmoji}>📥</Text>
             <Text style={styles.modalTitle}>Download My Data</Text>
             <Text style={styles.modalSub}>
-              Under UK GDPR you have the right to download all data Bellava holds about you. This includes your profile, cycle logs and health records.
+              Under UK GDPR you have the right to download all data Bellava holds about you.
             </Text>
             <TouchableOpacity
               style={styles.saveBtn}
               onPress={() => {
                 setShowDownloadData(false);
                 Alert.alert(
-                  '📥 Data Request Received',
-                  'We have received your data download request. We will send your data to ' + (userEmail || 'your email') + ' within 30 days as required by UK GDPR. 💜',
+                  '📥 Request Received',
+                  'We will send your data to ' + (userEmail || 'your email') + ' within 30 days. 💜',
                   [{ text: 'OK' }]
                 );
               }}
@@ -573,7 +549,7 @@ export default function ProfileScreen({
         </View>
       </Modal>
 
-      {/* Avatar Colour Modal */}
+      {/* Avatar Modal */}
       <Modal visible={showAvatarModal} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
           <View style={styles.modalSheet}>
@@ -633,8 +609,8 @@ export default function ProfileScreen({
                   setShowJourneyModal(false);
                   Alert.alert(
                     `${j.emoji} Journey Updated`,
-                    `Your journey has been changed to ${j.label}. Bellava will personalise your experience. 💜`,
-                    [{ text: 'Great!', style: 'default' }]
+                    `Your journey has been changed to ${j.label}. 💜`,
+                    [{ text: 'Great!' }]
                   );
                 }}
               >
@@ -707,17 +683,14 @@ export default function ProfileScreen({
             >
               <Text style={styles.confirmLogoutText}>Yes, sign out</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.closeBtn}
-              onPress={() => setShowLogoutModal(false)}
-            >
+            <TouchableOpacity style={styles.closeBtn} onPress={() => setShowLogoutModal(false)}>
               <Text style={styles.closeBtnText}>Cancel</Text>
             </TouchableOpacity>
           </View>
         </View>
       </Modal>
 
-      {/* Delete Account Modal */}
+      {/* Delete Modal */}
       <Modal visible={showDeleteModal} animationType="fade" transparent>
         <View style={styles.modalOverlay}>
           <View style={[styles.modalSheet, { alignItems: 'center' }]}>
@@ -725,7 +698,7 @@ export default function ProfileScreen({
             <Text style={styles.modalEmoji}>⚠️</Text>
             <Text style={styles.modalTitle}>Delete Account?</Text>
             <Text style={styles.modalSub}>
-              This will permanently delete your account and all your data. This cannot be undone.
+              This will permanently delete your account and all data. This cannot be undone.
             </Text>
             <TouchableOpacity
               style={styles.confirmDeleteBtn}
@@ -733,10 +706,7 @@ export default function ProfileScreen({
             >
               <Text style={styles.confirmDeleteText}>Yes, delete my account</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.closeBtn}
-              onPress={() => setShowDeleteModal(false)}
-            >
+            <TouchableOpacity style={styles.closeBtn} onPress={() => setShowDeleteModal(false)}>
               <Text style={styles.closeBtnText}>Cancel</Text>
             </TouchableOpacity>
           </View>
@@ -783,6 +753,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 6,
     borderRadius: 50, paddingHorizontal: 14, paddingVertical: 8,
     borderWidth: 1, marginBottom: 14,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderColor: 'rgba(255,255,255,0.3)',
   },
   journeyBadgeEmoji: { fontSize: 16 },
   journeyBadgeText: { fontSize: 13, fontWeight: '700', color: '#fff' },
@@ -870,16 +842,9 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.border, alignSelf: 'center', marginBottom: 20,
   },
   modalEmoji: { fontSize: 44, marginBottom: 12, textAlign: 'center' },
-  modalTitle: {
-    fontSize: 20, fontWeight: '800', color: COLORS.text, marginBottom: 6,
-  },
-  modalSub: {
-    fontSize: 14, color: COLORS.textLight, marginBottom: 20, lineHeight: 22,
-  },
-  inputLabel: {
-    fontSize: 14, fontWeight: '700', color: COLORS.text,
-    marginBottom: 8, marginTop: 4,
-  },
+  modalTitle: { fontSize: 20, fontWeight: '800', color: COLORS.text, marginBottom: 6 },
+  modalSub: { fontSize: 14, color: COLORS.textLight, marginBottom: 20, lineHeight: 22 },
+  inputLabel: { fontSize: 14, fontWeight: '700', color: COLORS.text, marginBottom: 8, marginTop: 4 },
   input: {
     backgroundColor: COLORS.background, borderRadius: 14,
     paddingHorizontal: 16, paddingVertical: 14,
@@ -887,10 +852,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5, borderColor: COLORS.border, marginBottom: 16,
   },
   legalScroll: { maxHeight: 400, marginBottom: 16 },
-  legalText: {
-    fontSize: 13, color: COLORS.text,
-    lineHeight: 22, whiteSpace: 'pre-line',
-  },
+  legalText: { fontSize: 13, color: COLORS.text, lineHeight: 22 },
   saveBtn: {
     backgroundColor: COLORS.primary, borderRadius: 50,
     paddingVertical: 15, alignItems: 'center', marginBottom: 10,
