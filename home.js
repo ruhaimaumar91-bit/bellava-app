@@ -5,6 +5,7 @@ import {
   Dimensions, Animated,
 } from 'react-native';
 import COLORS from './colors';
+import CheckInSummaryCard from './checkinsummarycard';
 
 const { width } = Dimensions.get('window');
 
@@ -166,6 +167,12 @@ export default function HomeScreen({ userName, userPlan, userJourney, onNavigate
           </View>
           <Text style={[styles.journeyBannerArrow, { color: journey.color }]}>›</Text>
         </TouchableOpacity>
+
+        {/* Daily Check-In Card */}
+        <CheckInSummaryCard
+          onPress={() => onNavigate('checkin')}
+          checkInData={null}
+        />
 
         {/* Flower Cycle Tracker */}
         <View style={styles.flowerSection}>

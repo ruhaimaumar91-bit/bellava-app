@@ -25,6 +25,8 @@ import ProfileScreen from './profile';
 import NotificationsScreen from './notifications';
 import AdminScreen from './admin';
 import PregnancyScreen from './pregnancy';
+import DailyCheckInScreen from './dailycheckinscreen';
+import CheckInSummaryCard from './checkinsummarycard';
 
 const TABS = [
   { id: 'home', label: 'Home', emoji: '🏠' },
@@ -154,6 +156,14 @@ export default function App() {
   return (
     <PregnancyScreen
       onBack={() => setSubScreen(null)}
+    />
+  );
+}
+if (subScreen === 'checkin') {
+  return (
+    <DailyCheckInScreen
+      onBack={() => setSubScreen(null)}
+      userName={userName}
     />
   );
 }
