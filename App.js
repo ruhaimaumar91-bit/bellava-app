@@ -3,6 +3,7 @@ import {
   View, Text, StyleSheet, TouchableOpacity, SafeAreaView,
 } from 'react-native';
 
+import { supabase } from './supabase';
 import SplashScreen from './splashscreen';
 import OnboardingScreen from './onboarding';
 import LoginScreen from './login';
@@ -55,10 +56,10 @@ export default function App() {
   const [userJourney, setUserJourney] = useState(null);
 
   const handleLoginSuccess = (name, email) => {
-    setUserName(name || 'Beautiful');
-    setUserEmail(email || '');
-    setAppScreen('main');
-  };
+  setUserName(name || 'Beautiful');
+  setUserEmail(email || '');
+  setAppScreen('main');
+};
 
   const handleSignupSuccess = (name, email) => {
     setUserName(name || 'Beautiful');

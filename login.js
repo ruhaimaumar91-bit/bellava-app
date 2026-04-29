@@ -2,9 +2,11 @@ import React, { useState, useRef } from 'react';
 import {
   View, Text, StyleSheet, TextInput,
   TouchableOpacity, SafeAreaView, StatusBar,
-  Animated, KeyboardAvoidingView, Platform, ScrollView,
+  Animated, KeyboardAvoidingView, Platform,
+  ScrollView, Alert,
 } from 'react-native';
 import COLORS from './colors';
+import { supabase } from './supabase';
 
 export default function LoginScreen({ onSuccess, onGoToSignup }) {
   const [email, setEmail] = useState('');
@@ -35,12 +37,36 @@ export default function LoginScreen({ onSuccess, onGoToSignup }) {
       shake();
       return;
     }
+
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      const name = email.split('@')[0];
-      onSuccess(name, email);
-    }, 1500);
+    try {
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
+        email: email.trim().toLowerCase(),
+        password: password,
+      });
+
+      if (authError) {
+        setError('Incorrect email or password. Please try again.');
+        shake();
+        setLoading(false);
+        return;
+      }
+
+      if (data.user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('first_name, email')
+          .eq('id', data.user.id)
+          .single();
+
+        const name = profile?.first_name || email.split('@')[0];
+        onSuccess(name, data.user.email);
+      }
+    } catch (err) {
+      setError('Something went wrong. Please check your connection and try again.');
+      shake();
+    }
+    setLoading(false);
   };
 
   return (
@@ -105,7 +131,21 @@ export default function LoginScreen({ onSuccess, onGoToSignup }) {
               </TouchableOpacity>
             </View>
 
-            <TouchableOpacity style={styles.forgotBtn}>
+            <TouchableOpacity
+              style={styles.forgotBtn}
+              onPress={() => {
+                if (!email.trim()) {
+                  Alert.alert('Reset Password', 'Please enter your email address first.');
+                  return;
+                }
+                supabase.auth.resetPasswordForEmail(email.trim()).then(() => {
+                  Alert.alert(
+                    '📧 Email sent!',
+                    'Check your inbox for a password reset link. 💜'
+                  );
+                });
+              }}
+            >
               <Text style={styles.forgotText}>Forgot password?</Text>
             </TouchableOpacity>
 
@@ -125,11 +165,17 @@ export default function LoginScreen({ onSuccess, onGoToSignup }) {
               <View style={styles.divider} />
             </View>
 
-            <TouchableOpacity style={styles.socialBtn}>
+            <TouchableOpacity
+              style={styles.socialBtn}
+              onPress={() => Alert.alert('Coming Soon', 'Apple Sign In coming soon! 💜')}
+            >
               <Text style={styles.socialBtnText}>🍎  Continue with Apple</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.socialBtn}>
+            <TouchableOpacity
+              style={styles.socialBtn}
+              onPress={() => Alert.alert('Coming Soon', 'Google Sign In coming soon! 💜')}
+            >
               <Text style={styles.socialBtnText}>🌐  Continue with Google</Text>
             </TouchableOpacity>
           </Animated.View>

@@ -2,9 +2,11 @@ import React, { useState, useRef } from 'react';
 import {
   View, Text, StyleSheet, TextInput,
   TouchableOpacity, SafeAreaView, StatusBar,
-  Animated, KeyboardAvoidingView, Platform, ScrollView,
+  Animated, KeyboardAvoidingView, Platform,
+  ScrollView, Alert,
 } from 'react-native';
 import COLORS from './colors';
+import { supabase } from './supabase';
 
 export default function SignupScreen({ onSuccess, onGoToLogin }) {
   const [firstName, setFirstName] = useState('');
@@ -29,36 +31,76 @@ export default function SignupScreen({ onSuccess, onGoToLogin }) {
 
   const handleSignup = async () => {
     setError('');
+
     if (!firstName.trim() || !lastName.trim()) {
       setError('Please enter your full name.');
-      shake();
-      return;
+      shake(); return;
     }
     if (!email.trim() || !email.includes('@')) {
       setError('Please enter a valid email address.');
-      shake();
-      return;
+      shake(); return;
     }
     if (password.length < 8) {
       setError('Password must be at least 8 characters.');
-      shake();
-      return;
+      shake(); return;
     }
     if (password !== confirmPassword) {
       setError('Passwords do not match.');
-      shake();
-      return;
+      shake(); return;
     }
     if (!agreed) {
       setError('Please agree to the Terms and Privacy Policy.');
-      shake();
-      return;
+      shake(); return;
     }
+
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      onSuccess(firstName, email);
-    }, 1500);
+    try {
+      const { data, error: authError } = await supabase.auth.signUp({
+        email: email.trim().toLowerCase(),
+        password: password,
+        options: {
+          data: {
+            first_name: firstName.trim(),
+            last_name: lastName.trim(),
+          },
+        },
+      });
+
+      if (authError) {
+        if (authError.message.includes('already registered')) {
+          setError('This email is already registered. Please sign in instead.');
+        } else {
+          setError(authError.message);
+        }
+        shake();
+        setLoading(false);
+        return;
+      }
+
+      if (data.user) {
+        await supabase.from('profiles').insert({
+          id: data.user.id,
+          email: email.trim().toLowerCase(),
+          first_name: firstName.trim(),
+          last_name: lastName.trim(),
+          plan: 'FREE',
+          journey: 'wellbeing',
+        });
+
+        Alert.alert(
+          '🌸 Welcome to Bellava!',
+          'Please check your email to confirm your account, then you can sign in. 💜',
+          [{
+            text: 'OK',
+            onPress: () => onSuccess(firstName.trim(), email.trim()),
+          }]
+        );
+      }
+    } catch (err) {
+      setError('Something went wrong. Please check your connection and try again.');
+      shake();
+    }
+    setLoading(false);
   };
 
   return (
@@ -192,11 +234,17 @@ export default function SignupScreen({ onSuccess, onGoToLogin }) {
               <View style={styles.divider} />
             </View>
 
-            <TouchableOpacity style={styles.socialBtn}>
+            <TouchableOpacity
+              style={styles.socialBtn}
+              onPress={() => Alert.alert('Coming Soon', 'Apple Sign In coming soon! 💜')}
+            >
               <Text style={styles.socialBtnText}>🍎  Continue with Apple</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.socialBtn}>
+            <TouchableOpacity
+              style={styles.socialBtn}
+              onPress={() => Alert.alert('Coming Soon', 'Google Sign In coming soon! 💜')}
+            >
               <Text style={styles.socialBtnText}>🌐  Continue with Google</Text>
             </TouchableOpacity>
           </Animated.View>
