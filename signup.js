@@ -7,9 +7,10 @@ import {
 import { createClient } from '@supabase/supabase-js';
 import COLORS from './colors';
 
-const supabase = createClient( 
+const supabase = createClient(
   'https://qtvjsvgrojiafyayxrmz.supabase.co',
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF0dmpzdmdyb2ppYWZ5YXl4cm16Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3MTIyOTMsImV4cCI6MjA5MjI4ODI5M30.x3AeUcM2_Ur-NvezP8s4rluf_HM7SZIi0vWeLjZbjiY'
+);
 
 export default function SignupScreen({ onSignupSuccess, onGoToLogin }) {
   const [firstName, setFirstName] = useState('');
@@ -22,7 +23,6 @@ export default function SignupScreen({ onSignupSuccess, onGoToLogin }) {
   const [loading, setLoading] = useState(false);
 
   const handleSignup = async () => {
-    // Validation
     if (!firstName.trim()) {
       Alert.alert('Missing info', 'Please enter your first name. 💜');
       return;
@@ -51,7 +51,6 @@ export default function SignupScreen({ onSignupSuccess, onGoToLogin }) {
     setLoading(true);
 
     try {
-      // Step 1 — Create auth user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: email.trim().toLowerCase(),
         password: password,
@@ -76,7 +75,6 @@ export default function SignupScreen({ onSignupSuccess, onGoToLogin }) {
         return;
       }
 
-      // Step 2 — Save profile using upsert (safer than insert)
       const { error: profileError } = await supabase
         .from('profiles')
         .upsert({
@@ -90,11 +88,8 @@ export default function SignupScreen({ onSignupSuccess, onGoToLogin }) {
 
       if (profileError) {
         console.log('Profile error:', profileError.message);
-        // Still let user in even if profile save fails
-        // They can update profile later
       }
 
-      // Step 3 — Success!
       setLoading(false);
       onSignupSuccess(
         firstName.trim() + (lastName.trim() ? ' ' + lastName.trim() : ''),
@@ -103,7 +98,10 @@ export default function SignupScreen({ onSignupSuccess, onGoToLogin }) {
 
     } catch (error) {
       console.log('Signup error:', error);
-      Alert.alert('Something went wrong', 'Please check your connection and try again. 💜');
+      Alert.alert(
+        'Connection error',
+        'Please check your internet connection and try again. 💜'
+      );
       setLoading(false);
     }
   };
@@ -128,7 +126,6 @@ export default function SignupScreen({ onSignupSuccess, onGoToLogin }) {
         <Text style={styles.title}>Create your account</Text>
         <Text style={styles.subtitle}>Join thousands of women on Bellava 💜</Text>
 
-        {/* Form Card */}
         <View style={styles.card}>
 
           {/* Name Row */}
@@ -137,7 +134,7 @@ export default function SignupScreen({ onSignupSuccess, onGoToLogin }) {
               <Text style={styles.label}>First name</Text>
               <TextInput
                 style={styles.input}
-                placeholder="Your first name"
+                placeholder="First name"
                 placeholderTextColor={COLORS.textLight}
                 value={firstName}
                 onChangeText={setFirstName}
@@ -206,7 +203,7 @@ export default function SignupScreen({ onSignupSuccess, onGoToLogin }) {
             autoCorrect={false}
           />
 
-          {/* Terms Checkbox */}
+          {/* Terms */}
           <TouchableOpacity
             style={styles.checkboxRow}
             onPress={() => setAgreed(!agreed)}
@@ -244,13 +241,19 @@ export default function SignupScreen({ onSignupSuccess, onGoToLogin }) {
             <View style={styles.divider} />
           </View>
 
-          {/* Apple Button */}
-          <TouchableOpacity style={styles.appleBtn}>
+          {/* Apple */}
+          <TouchableOpacity
+            style={styles.appleBtn}
+            onPress={() => Alert.alert('Coming Soon', 'Apple Sign In coming soon! 💜')}
+          >
             <Text style={styles.appleBtnText}>🍎  Continue with Apple</Text>
           </TouchableOpacity>
 
-          {/* Google Button */}
-          <TouchableOpacity style={styles.googleBtn}>
+          {/* Google */}
+          <TouchableOpacity
+            style={styles.googleBtn}
+            onPress={() => Alert.alert('Coming Soon', 'Google Sign In coming soon! 💜')}
+          >
             <Text style={styles.googleBtnText}>🔵  Continue with Google</Text>
           </TouchableOpacity>
 
@@ -267,7 +270,6 @@ export default function SignupScreen({ onSignupSuccess, onGoToLogin }) {
           </Text>
         </TouchableOpacity>
 
-        {/* Company */}
         <Text style={styles.company}>by Reine Mande Ltd · London 🇬🇧</Text>
 
         <View style={{ height: 40 }} />

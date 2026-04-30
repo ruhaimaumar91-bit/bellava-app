@@ -1,282 +1,328 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import {
   View, Text, StyleSheet, TextInput,
   TouchableOpacity, SafeAreaView, StatusBar,
-  Animated, KeyboardAvoidingView, Platform,
-  ScrollView, Alert,
+  ScrollView, Alert, ActivityIndicator,
 } from 'react-native';
+import { createClient } from '@supabase/supabase-js';
 import COLORS from './colors';
-import { supabase } from './supabase';
 
-export default function LoginScreen({ onSuccess, onGoToSignup }) {
+const supabase = createClient(
+  'https://qtvjsvgrojiafyayxrmz.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF0dmpzdmdyb2ppYWZ5YXl4cm16Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3MTIyOTMsImV4cCI6MjA5MjI4ODI5M30.x3AeUcM2_Ur-NvezP8s4rluf_HM7SZIi0vWeLjZbjiY'
+);
+
+export default function LoginScreen({ onLoginSuccess, onGoToSignup }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const shakeAnim = useRef(new Animated.Value(0)).current;
-
-  const shake = () => {
-    Animated.sequence([
-      Animated.timing(shakeAnim, { toValue: 10, duration: 50, useNativeDriver: true }),
-      Animated.timing(shakeAnim, { toValue: -10, duration: 50, useNativeDriver: true }),
-      Animated.timing(shakeAnim, { toValue: 10, duration: 50, useNativeDriver: true }),
-      Animated.timing(shakeAnim, { toValue: 0, duration: 50, useNativeDriver: true }),
-    ]).start();
-  };
 
   const handleLogin = async () => {
-    setError('');
-    if (!email.trim() || !password.trim()) {
-      setError('Please enter your email and password.');
-      shake();
+    if (!email.trim()) {
+      Alert.alert('Missing info', 'Please enter your email address. 💜');
       return;
     }
-    if (!email.includes('@')) {
-      setError('Please enter a valid email address.');
-      shake();
+    if (!password) {
+      Alert.alert('Missing info', 'Please enter your password. 💜');
       return;
     }
 
     setLoading(true);
+
     try {
-      const { data, error: authError } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim().toLowerCase(),
         password: password,
       });
 
-      if (authError) {
-        setError('Incorrect email or password. Please try again.');
-        shake();
+      if (error) {
+        if (error.message.includes('Invalid login credentials')) {
+          Alert.alert(
+            'Incorrect details',
+            'Your email or password is incorrect. Please try again. 💜'
+          );
+        } else if (error.message.includes('Email not confirmed')) {
+          Alert.alert(
+            'Email not confirmed',
+            'Please check your inbox and confirm your email first. 💜'
+          );
+        } else {
+          Alert.alert('Login failed', error.message);
+        }
         setLoading(false);
         return;
       }
 
-      if (data.user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('first_name, email')
-          .eq('id', data.user.id)
-          .single();
-
-        const name = profile?.first_name || email.split('@')[0];
-        onSuccess(name, data.user.email);
+      if (!data?.user) {
+        Alert.alert('Something went wrong', 'Please try again. 💜');
+        setLoading(false);
+        return;
       }
-    } catch (err) {
-      setError('Something went wrong. Please check your connection and try again.');
-      shake();
+
+      // Get profile from database
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('first_name, last_name, plan, journey')
+        .eq('id', data.user.id)
+        .single();
+
+      setLoading(false);
+
+      const name = profile
+        ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim()
+        : data.user.email;
+
+      onLoginSuccess(
+        name || 'Beautiful',
+        data.user.email,
+        profile?.plan || 'FREE',
+        profile?.journey || 'wellbeing'
+      );
+
+    } catch (error) {
+      console.log('Login error:', error);
+      Alert.alert(
+        'Connection error',
+        'Please check your internet connection and try again. 💜'
+      );
+      setLoading(false);
     }
-    setLoading(false);
+  };
+
+  const handleForgotPassword = async () => {
+    if (!email.trim()) {
+      Alert.alert(
+        'Enter your email',
+        'Please enter your email address first, then tap Forgot Password. 💜'
+      );
+      return;
+    }
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(
+        email.trim().toLowerCase()
+      );
+      if (error) {
+        Alert.alert('Error', error.message);
+      } else {
+        Alert.alert(
+          '📧 Email sent!',
+          'Check your inbox for a password reset link. 💜'
+        );
+      }
+    } catch (e) {
+      Alert.alert('Error', 'Could not send reset email. Please try again.');
+    }
   };
 
   return (
     <SafeAreaView style={styles.safe}>
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={{ flex: 1 }}
+
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
-        <ScrollView
-          contentContainerStyle={styles.scroll}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-        >
-          {/* Logo */}
-          <View style={styles.logoArea}>
-            <View style={styles.logoCircle}>
-              <Text style={styles.logoLetter}>B</Text>
-            </View>
-            <Text style={styles.appName}>Bellava</Text>
-            <Text style={styles.tagline}>Welcome back 💜</Text>
+        {/* Logo */}
+        <View style={styles.logoWrap}>
+          <View style={styles.logo}>
+            <Text style={styles.logoLetter}>B</Text>
           </View>
+        </View>
 
-          {/* Form */}
-          <Animated.View
-            style={[styles.form, { transform: [{ translateX: shakeAnim }] }]}
-          >
-            {error ? (
-              <View style={styles.errorBox}>
-                <Text style={styles.errorText}>⚠️ {error}</Text>
-              </View>
-            ) : null}
+        <Text style={styles.title}>Welcome back 💜</Text>
+        <Text style={styles.subtitle}>Sign in to your Bellava account</Text>
 
-            <Text style={styles.label}>Email address</Text>
+        {/* Form Card */}
+        <View style={styles.card}>
+
+          {/* Email */}
+          <Text style={styles.label}>Email address</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="your@email.com"
+            placeholderTextColor={COLORS.textLight}
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+
+          {/* Password */}
+          <Text style={styles.label}>Password</Text>
+          <View style={styles.passwordWrap}>
             <TextInput
-              style={styles.input}
-              placeholder="you@example.com"
+              style={styles.passwordInput}
+              placeholder="Your password"
               placeholderTextColor={COLORS.textLight}
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!showPassword}
               autoCapitalize="none"
               autoCorrect={false}
             />
-
-            <Text style={styles.label}>Password</Text>
-            <View style={styles.passwordRow}>
-              <TextInput
-                style={styles.passwordInput}
-                placeholder="Your password"
-                placeholderTextColor={COLORS.textLight}
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry={!showPassword}
-                autoCapitalize="none"
-              />
-              <TouchableOpacity
-                style={styles.eyeBtn}
-                onPress={() => setShowPassword(!showPassword)}
-              >
-                <Text style={styles.eyeIcon}>{showPassword ? '🙈' : '👁️'}</Text>
-              </TouchableOpacity>
-            </View>
-
             <TouchableOpacity
-              style={styles.forgotBtn}
-              onPress={() => {
-                if (!email.trim()) {
-                  Alert.alert('Reset Password', 'Please enter your email address first.');
-                  return;
-                }
-                supabase.auth.resetPasswordForEmail(email.trim()).then(() => {
-                  Alert.alert(
-                    '📧 Email sent!',
-                    'Check your inbox for a password reset link. 💜'
-                  );
-                });
-              }}
+              onPress={() => setShowPassword(!showPassword)}
+              style={styles.eyeBtn}
             >
-              <Text style={styles.forgotText}>Forgot password?</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.loginBtn, loading && styles.loginBtnDisabled]}
-              onPress={handleLogin}
-              disabled={loading}
-            >
-              <Text style={styles.loginBtnText}>
-                {loading ? 'Signing in...' : 'Sign In 💜'}
-              </Text>
-            </TouchableOpacity>
-
-            <View style={styles.dividerRow}>
-              <View style={styles.divider} />
-              <Text style={styles.dividerText}>or</Text>
-              <View style={styles.divider} />
-            </View>
-
-            <TouchableOpacity
-              style={styles.socialBtn}
-              onPress={() => Alert.alert('Coming Soon', 'Apple Sign In coming soon! 💜')}
-            >
-              <Text style={styles.socialBtnText}>🍎  Continue with Apple</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.socialBtn}
-              onPress={() => Alert.alert('Coming Soon', 'Google Sign In coming soon! 💜')}
-            >
-              <Text style={styles.socialBtnText}>🌐  Continue with Google</Text>
-            </TouchableOpacity>
-          </Animated.View>
-
-          {/* Sign up link */}
-          <View style={styles.signupRow}>
-            <Text style={styles.signupText}>Don't have an account? </Text>
-            <TouchableOpacity onPress={onGoToSignup}>
-              <Text style={styles.signupLink}>Sign up free</Text>
+              <Text style={styles.eyeIcon}>{showPassword ? '🙈' : '👁️'}</Text>
             </TouchableOpacity>
           </View>
 
-          <Text style={styles.legalText}>
-            By signing in you agree to our Terms of Service and Privacy Policy.
+          {/* Forgot Password */}
+          <TouchableOpacity
+            style={styles.forgotBtn}
+            onPress={handleForgotPassword}
+          >
+            <Text style={styles.forgotText}>Forgot password?</Text>
+          </TouchableOpacity>
+
+          {/* Login Button */}
+          <TouchableOpacity
+            style={[styles.loginBtn, loading && styles.loginBtnDisabled]}
+            onPress={handleLogin}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" size="small" />
+            ) : (
+              <Text style={styles.loginBtnText}>Sign In 💜</Text>
+            )}
+          </TouchableOpacity>
+
+          {/* Divider */}
+          <View style={styles.dividerRow}>
+            <View style={styles.divider} />
+            <Text style={styles.dividerText}>or</Text>
+            <View style={styles.divider} />
+          </View>
+
+          {/* Apple Button */}
+          <TouchableOpacity
+            style={styles.appleBtn}
+            onPress={() => Alert.alert('Coming Soon', 'Apple Sign In coming soon! 💜')}
+          >
+            <Text style={styles.appleBtnText}>🍎  Continue with Apple</Text>
+          </TouchableOpacity>
+
+          {/* Google Button */}
+          <TouchableOpacity
+            style={styles.googleBtn}
+            onPress={() => Alert.alert('Coming Soon', 'Google Sign In coming soon! 💜')}
+          >
+            <Text style={styles.googleBtnText}>🔵  Continue with Google</Text>
+          </TouchableOpacity>
+
+        </View>
+
+        {/* Sign Up Link */}
+        <TouchableOpacity
+          style={styles.signupLink}
+          onPress={onGoToSignup}
+        >
+          <Text style={styles.signupLinkText}>
+            Don't have an account?{' '}
+            <Text style={styles.signupLinkBold}>Create one free</Text>
           </Text>
-        </ScrollView>
-      </KeyboardAvoidingView>
+        </TouchableOpacity>
+
+        {/* Company */}
+        <Text style={styles.company}>by Reine Mande Ltd · London 🇬🇧</Text>
+
+        <View style={{ height: 40 }} />
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: COLORS.background },
-  scroll: { flexGrow: 1, paddingHorizontal: 24, paddingBottom: 40 },
-  logoArea: { alignItems: 'center', paddingTop: 48, marginBottom: 36 },
-  logoCircle: {
+  scroll: { flex: 1 },
+  scrollContent: { padding: 24, paddingTop: 40 },
+  logoWrap: { alignItems: 'center', marginBottom: 20 },
+  logo: {
     width: 72, height: 72, borderRadius: 36,
     backgroundColor: COLORS.primary,
     alignItems: 'center', justifyContent: 'center',
-    marginBottom: 14,
-    shadowColor: COLORS.primary,
-    shadowOpacity: 0.3, shadowRadius: 12, elevation: 4,
+    shadowColor: COLORS.primary, shadowOpacity: 0.3,
+    shadowRadius: 12, elevation: 6,
   },
-  logoLetter: { color: '#fff', fontSize: 34, fontWeight: '800' },
-  appName: { fontSize: 28, fontWeight: '800', color: COLORS.text, marginBottom: 6 },
-  tagline: { fontSize: 16, color: COLORS.textLight },
-  form: {
+  logoLetter: { color: '#fff', fontSize: 32, fontWeight: '800' },
+  title: {
+    fontSize: 28, fontWeight: '800',
+    color: COLORS.text, textAlign: 'center', marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 15, color: COLORS.textLight,
+    textAlign: 'center', marginBottom: 28,
+  },
+  card: {
     backgroundColor: COLORS.white, borderRadius: 24,
-    padding: 24, marginBottom: 20,
+    padding: 24,
     shadowColor: '#000', shadowOpacity: 0.06,
-    shadowRadius: 16, elevation: 3,
+    shadowRadius: 16, elevation: 4,
   },
-  errorBox: {
-    backgroundColor: '#FFF0F0', borderRadius: 12,
-    padding: 12, marginBottom: 16,
-    borderWidth: 1, borderColor: '#FFD0D0',
-  },
-  errorText: { color: COLORS.error, fontSize: 14, fontWeight: '600' },
   label: {
     fontSize: 14, fontWeight: '700',
-    color: COLORS.text, marginBottom: 8, marginTop: 4,
+    color: COLORS.text, marginBottom: 8, marginTop: 12,
   },
   input: {
     backgroundColor: COLORS.background, borderRadius: 14,
     paddingHorizontal: 16, paddingVertical: 14,
     fontSize: 15, color: COLORS.text,
     borderWidth: 1.5, borderColor: COLORS.border,
-    marginBottom: 16,
   },
-  passwordRow: {
+  passwordWrap: {
     flexDirection: 'row', alignItems: 'center',
     backgroundColor: COLORS.background, borderRadius: 14,
-    borderWidth: 1.5, borderColor: COLORS.border, marginBottom: 8,
+    borderWidth: 1.5, borderColor: COLORS.border,
+    paddingRight: 12,
   },
   passwordInput: {
     flex: 1, paddingHorizontal: 16, paddingVertical: 14,
     fontSize: 15, color: COLORS.text,
   },
-  eyeBtn: { paddingHorizontal: 14 },
+  eyeBtn: { padding: 4 },
   eyeIcon: { fontSize: 18 },
-  forgotBtn: { alignSelf: 'flex-end', marginBottom: 20, marginTop: 4 },
+  forgotBtn: { alignSelf: 'flex-end', marginTop: 10, marginBottom: 4 },
   forgotText: { fontSize: 13, color: COLORS.primary, fontWeight: '600' },
   loginBtn: {
     backgroundColor: COLORS.primary, borderRadius: 50,
     paddingVertical: 16, alignItems: 'center',
+    marginTop: 20, marginBottom: 8,
     shadowColor: COLORS.primary, shadowOpacity: 0.3,
-    shadowRadius: 10, elevation: 3,
+    shadowRadius: 10, elevation: 4,
   },
-  loginBtnDisabled: { opacity: 0.6 },
+  loginBtnDisabled: { opacity: 0.7 },
   loginBtnText: { color: '#fff', fontSize: 17, fontWeight: '700' },
   dividerRow: {
     flexDirection: 'row', alignItems: 'center',
-    marginVertical: 20, gap: 10,
+    gap: 12, marginVertical: 16,
   },
   divider: { flex: 1, height: 1, backgroundColor: COLORS.border },
   dividerText: { fontSize: 13, color: COLORS.textLight },
-  socialBtn: {
+  appleBtn: {
     borderWidth: 1.5, borderColor: COLORS.border,
     borderRadius: 50, paddingVertical: 14,
-    alignItems: 'center', marginBottom: 12,
+    alignItems: 'center', marginBottom: 10,
     backgroundColor: COLORS.white,
   },
-  socialBtnText: { fontSize: 15, fontWeight: '600', color: COLORS.text },
-  signupRow: {
-    flexDirection: 'row', justifyContent: 'center',
-    alignItems: 'center', marginBottom: 16,
+  appleBtnText: { fontSize: 15, fontWeight: '600', color: COLORS.text },
+  googleBtn: {
+    borderWidth: 1.5, borderColor: COLORS.border,
+    borderRadius: 50, paddingVertical: 14,
+    alignItems: 'center',
+    backgroundColor: COLORS.white,
   },
-  signupText: { fontSize: 15, color: COLORS.textLight },
-  signupLink: { fontSize: 15, color: COLORS.primary, fontWeight: '700' },
-  legalText: {
-    fontSize: 11, color: COLORS.textLight,
-    textAlign: 'center', lineHeight: 18, paddingHorizontal: 20,
+  googleBtnText: { fontSize: 15, fontWeight: '600', color: COLORS.text },
+  signupLink: { alignItems: 'center', marginTop: 24 },
+  signupLinkText: { fontSize: 15, color: COLORS.textLight },
+  signupLinkBold: { color: COLORS.primary, fontWeight: '700' },
+  company: {
+    textAlign: 'center', fontSize: 12,
+    color: COLORS.textLight, marginTop: 16, opacity: 0.7,
   },
 });
