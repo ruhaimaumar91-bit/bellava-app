@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import {
+  View, Text, StyleSheet, TouchableOpacity,
+  SafeAreaView, StatusBar, Alert,
+} from 'react-native';
 
 import SplashScreen from './splashscreen';
 import OnboardingScreen from './onboarding';
 import LoginScreen from './login';
 import SignupScreen from './signup';
-import DisclaimerScreen from './disclaimer';
-import JourneyScreen from './journey';
 import HomeScreen from './home';
 import BellaScreen from './bella';
 import CycleScreen from './cycle';
 import CommunityScreen from './community';
 import ProfileScreen from './profile';
-import AdminScreen from './admin';
 import AcademyScreen from './academy';
 import CarefinderScreen from './carefinder';
 import SymptomCheckerScreen from './symptomchecker';
@@ -23,7 +23,9 @@ import PregnancyScreen from './pregnancy';
 import SubscriptionScreen from './subscription';
 import NotificationsScreen from './notifications';
 import TrackerScreen from './tracker';
-import DailyCheckInScreen from './dailycheckinscreen';
+import AdminScreen from './admin';
+import DisclaimerScreen from './disclaimer';
+import JourneyScreen from './journey';
 
 const COLORS = {
   primary: '#C9748F',
@@ -32,7 +34,6 @@ const COLORS = {
   text: '#2D1B2E',
   textLight: '#9B8FA0',
   border: '#EDE0E8',
-  primaryLight: '#F9EEF3',
 };
 
 const TABS = [
@@ -52,22 +53,6 @@ export default function App() {
   const [userPlan, setUserPlan] = useState('FREE');
   const [userJourney, setUserJourney] = useState('wellbeing');
 
-  const handleLoginSuccess = (name, email, plan, journey) => {
-    setUserName(name || 'Beautiful');
-    setUserEmail(email || '');
-    setUserPlan(plan || 'FREE');
-    setUserJourney(journey || 'wellbeing');
-    setAppScreen('main');
-  };
-
-  const handleSignupSuccess = (name, email) => {
-    setUserName(name || 'Beautiful');
-    setUserEmail(email || '');
-    setUserPlan('FREE');
-    setUserJourney('wellbeing');
-    setAppScreen('disclaimer');
-  };
-
   const handleLogout = () => {
     setUserName('');
     setUserEmail('');
@@ -78,68 +63,21 @@ export default function App() {
     setAppScreen('login');
   };
 
-  const handleNavigate = (screen) => {
-    if (screen === 'admin') {
-      setSubScreen('admin');
-    } else if (screen === 'profile') {
-      setActiveTab('profile');
-      setSubScreen(null);
-    } else if (screen === 'home') {
-      setActiveTab('home');
-      setSubScreen(null);
-    } else if (screen === 'cycle') {
-      setActiveTab('cycle');
-      setSubScreen(null);
-    } else if (screen === 'bella') {
-      setActiveTab('bella');
-      setSubScreen(null);
-    } else if (screen === 'community') {
-      setActiveTab('community');
-      setSubScreen(null);
-    } else {
-      setSubScreen(screen);
-    }
-  };
-
-  // ── SPLASH ──
+  // SPLASH
   if (appScreen === 'splash') {
-    return (
-      <SplashScreen onFinish={() => setAppScreen('onboarding')} />
-    );
+    return <SplashScreen onFinish={() => setAppScreen('onboarding')} />;
   }
 
-  // ── ONBOARDING ──
+  // ONBOARDING
   if (appScreen === 'onboarding') {
     return (
-      <OnboardingScreen onFinish={() => setAppScreen('login')} />
-    );
-  }
-
-  // ── LOGIN ──
-  if (appScreen === 'login') {
-    return (
-      <LoginScreen
-        onLoginSuccess={(name, email, plan, journey) => {
-          handleLoginSuccess(name, email, plan, journey);
-        }}
-        onGoToSignup={() => setAppScreen('signup')}
+      <OnboardingScreen
+        onFinish={() => setAppScreen('disclaimer')}
       />
     );
   }
 
-  // ── SIGNUP ──
-  if (appScreen === 'signup') {
-    return (
-      <SignupScreen
-        onSignupSuccess={(name, email) => {
-          handleSignupSuccess(name, email);
-        }}
-        onGoToLogin={() => setAppScreen('login')}
-      />
-    );
-  }
-
-  // ── DISCLAIMER ──
+  // DISCLAIMER
   if (appScreen === 'disclaimer') {
     return (
       <DisclaimerScreen
@@ -148,220 +86,181 @@ export default function App() {
     );
   }
 
-  // ── JOURNEY ──
+  // JOURNEY
   if (appScreen === 'journey') {
     return (
       <JourneyScreen
         onSelect={(journey) => {
           setUserJourney(journey);
-          setAppScreen('main');
+          setAppScreen('signup');
         }}
       />
     );
   }
 
-  // ── MAIN APP ──
+  // SIGNUP
+  if (appScreen === 'signup') {
+    return (
+      <SignupScreen
+        onSignupSuccess={(name, email, plan) => {
+          setUserName(name || '');
+          setUserEmail(email || '');
+          setUserPlan(plan || 'FREE');
+          setAppScreen('main');
+        }}
+        onGoToLogin={() => setAppScreen('login')}
+      />
+    );
+  }
+
+  // LOGIN
+  if (appScreen === 'login') {
+    return (
+      <LoginScreen
+        onLoginSuccess={(name, email, plan) => {
+          setUserName(name || '');
+          setUserEmail(email || '');
+          setUserPlan(plan || 'FREE');
+          setAppScreen('main');
+        }}
+        onGoToSignup={() => setAppScreen('signup')}
+      />
+    );
+  }
+  // MAIN APP
   if (appScreen === 'main') {
 
     // Sub screens
-    if (subScreen === 'admin') {
-      return (
-        <AdminScreen onBack={() => setSubScreen(null)} />
-      );
-    }
+    if (subScreen === 'academy') return <AcademyScreen onBack={() => setSubScreen(null)} />;
+    if (subScreen === 'carefinder') return <CarefinderScreen onBack={() => setSubScreen(null)} />;
+    if (subScreen === 'symptomchecker') return <SymptomCheckerScreen onBack={() => setSubScreen(null)} />;
+    if (subScreen === 'nutrition') return <NutritionScreen onBack={() => setSubScreen(null)} />;
+    if (subScreen === 'babynames') return <BabyNamesScreen onBack={() => setSubScreen(null)} />;
+    if (subScreen === 'intimacy') return <IntimacyScreen onBack={() => setSubScreen(null)} />;
+    if (subScreen === 'pregnancy') return <PregnancyScreen onBack={() => setSubScreen(null)} />;
+    if (subScreen === 'subscription') return <SubscriptionScreen onBack={() => setSubScreen(null)} />;
+    if (subScreen === 'notifications') return <NotificationsScreen onBack={() => setSubScreen(null)} />;
+    if (subScreen === 'tracker') return <TrackerScreen onBack={() => setSubScreen(null)} />;
+    if (subScreen === 'admin') return <AdminScreen onBack={() => setSubScreen(null)} />;
 
-    if (subScreen === 'checkin') {
-      return (
-        <DailyCheckInScreen
-          onBack={() => setSubScreen(null)}
-          userName={userName}
-        />
-      );
-    }
-
-    if (subScreen === 'tracker') {
-      return (
-        <TrackerScreen
-          onBack={() => setSubScreen(null)}
-          userJourney={userJourney}
-        />
-      );
-    }
-
-    if (subScreen === 'academy') {
-      return (
-        <AcademyScreen onBack={() => setSubScreen(null)} />
-      );
-    }
-
-    if (subScreen === 'carefinder') {
-      return (
-        <CarefinderScreen onBack={() => setSubScreen(null)} />
-      );
-    }
-
-    if (subScreen === 'symptomchecker') {
-      return (
-        <SymptomCheckerScreen onBack={() => setSubScreen(null)} />
-      );
-    }
-
-    if (subScreen === 'nutrition') {
-      return (
-        <NutritionScreen
-          onBack={() => setSubScreen(null)}
-          userJourney={userJourney}
-        />
-      );
-    }
-
-    if (subScreen === 'babynames') {
-      return (
-        <BabyNamesScreen onBack={() => setSubScreen(null)} />
-      );
-    }
-
-    if (subScreen === 'intimacy') {
-      return (
-        <IntimacyScreen onBack={() => setSubScreen(null)} />
-      );
-    }
-
-    if (subScreen === 'pregnancy') {
-      return (
-        <PregnancyScreen onBack={() => setSubScreen(null)} />
-      );
-    }
-
-    if (subScreen === 'subscription') {
-      return (
-        <SubscriptionScreen
-          onBack={() => setSubScreen(null)}
-          userPlan={userPlan}
-          onUpgrade={(plan) => {
-            setUserPlan(plan);
-            setSubScreen(null);
-          }}
-        />
-      );
-    }
-
-    if (subScreen === 'notifications') {
-      return (
-        <NotificationsScreen onBack={() => setSubScreen(null)} />
-      );
-    }
-
-    // Main tabs
-    const renderTab = () => {
-      if (activeTab === 'home') {
-        return (
-          <HomeScreen
-            userName={userName}
-            userPlan={userPlan}
-            userJourney={userJourney}
-            onNavigate={handleNavigate}
-          />
-        );
-      }
-      if (activeTab === 'cycle') {
-        return (
-          <CycleScreen
-            onBack={() => setActiveTab('home')}
-            userPlan={userPlan}
-            userJourney={userJourney}
-          />
-        );
-      }
-      if (activeTab === 'bella') {
-        return (
-          <BellaScreen
-            onBack={() => setActiveTab('home')}
-            userName={userName}
-            userPlan={userPlan}
-            userJourney={userJourney}
-          />
-        );
-      }
-      if (activeTab === 'community') {
-        return (
-          <CommunityScreen
-            onBack={() => setActiveTab('home')}
-            userName={userName}
-            userPlan={userPlan}
-          />
-        );
-      }
-      if (activeTab === 'profile') {
-        return (
-          <ProfileScreen
-            onBack={() => setActiveTab('home')}
-            userName={userName}
-            userEmail={userEmail}
-            userPlan={userPlan}
-            userJourney={userJourney}
-            onLogout={handleLogout}
-            onNavigate={handleNavigate}
-          />
-        );
+    const renderScreen = () => {
+      switch (activeTab) {
+        case 'home':
+          return (
+            <HomeScreen
+              userName={userName}
+              userEmail={userEmail}
+              userPlan={userPlan}
+              userJourney={userJourney}
+              onNavigate={(screen) => {
+                if (screen === 'bella') setActiveTab('bella');
+                else if (screen === 'cycle') setActiveTab('cycle');
+                else if (screen === 'community') setActiveTab('community');
+                else if (screen === 'profile') setActiveTab('profile');
+                else setSubScreen(screen);
+              }}
+            />
+          );
+        case 'cycle':
+          return (
+            <CycleScreen
+              userName={userName}
+              userPlan={userPlan}
+              onNavigate={(screen) => setSubScreen(screen)}
+            />
+          );
+        case 'bella':
+          return (
+            <BellaScreen
+              userName={userName}
+              userPlan={userPlan}
+              userJourney={userJourney}
+            />
+          );
+        case 'community':
+          return (
+            <CommunityScreen
+              userName={userName}
+              userPlan={userPlan}
+              onNavigate={(screen) => setSubScreen(screen)}
+            />
+          );
+        case 'profile':
+          return (
+            <ProfileScreen
+              userName={userName}
+              userEmail={userEmail}
+              userPlan={userPlan}
+              onLogout={handleLogout}
+              onNavigate={(screen) => setSubScreen(screen)}
+            />
+          );
+        default:
+          return (
+            <HomeScreen
+              userName={userName}
+              userEmail={userEmail}
+              userPlan={userPlan}
+              onNavigate={(screen) => {
+                if (screen === 'bella') setActiveTab('bella');
+                else setSubScreen(screen);
+              }}
+            />
+          );
       }
     };
 
     return (
-      <View style={styles.container}>
+      <SafeAreaView style={styles.container}>
+        <StatusBar barStyle="dark-content" backgroundColor="#FAF0F5" />
+
+        {/* Main Screen Content */}
         <View style={styles.content}>
-          {renderTab()}
+          {renderScreen()}
         </View>
 
-        {/* Bottom Navigation */}
-        <View style={styles.bottomNav}>
+        {/* Bottom Tab Bar */}
+        <View style={styles.tabBar}>
           {TABS.map(tab => (
-            <View
+            <TouchableOpacity
               key={tab.id}
               style={styles.tabItem}
+              onPress={() => {
+                setActiveTab(tab.id);
+                setSubScreen(null);
+              }}
             >
-              <View
-                style={[
-                  styles.tabIconWrap,
-                  activeTab === tab.id && styles.tabIconWrapActive,
-                ]}
-              >
-                <Text
-                  style={styles.tabEmoji}
-                  onPress={() => {
-                    setSubScreen(null);
-                    setActiveTab(tab.id);
-                  }}
-                >
-                  {tab.emoji}
-                </Text>
+              <View style={[
+                styles.tabIconWrap,
+                activeTab === tab.id && styles.tabIconWrapActive
+              ]}>
+                <Text style={styles.tabEmoji}>{tab.emoji}</Text>
               </View>
               <Text style={[
                 styles.tabLabel,
-                activeTab === tab.id && styles.tabLabelActive,
+                activeTab === tab.id && styles.tabLabelActive
               ]}>
                 {tab.label}
               </Text>
-            </View>
+            </TouchableOpacity>
           ))}
         </View>
-      </View>
+      </SafeAreaView>
     );
   }
 
   return null;
 }
-
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
+  container: { flex: 1, backgroundColor: '#FAF0F5' },
   content: { flex: 1 },
-  bottomNav: {
+  tabBar: {
     flexDirection: 'row',
-    backgroundColor: COLORS.white,
-    paddingVertical: 10,
-    paddingBottom: 24,
+    backgroundColor: '#fff',
     borderTopWidth: 1,
-    borderTopColor: COLORS.border,
+    borderTopColor: '#EDE0E8',
+    paddingBottom: 8,
+    paddingTop: 8,
     shadowColor: '#000',
     shadowOpacity: 0.06,
     shadowRadius: 8,
@@ -370,25 +269,27 @@ const styles = StyleSheet.create({
   tabItem: {
     flex: 1,
     alignItems: 'center',
-    gap: 4,
+    justifyContent: 'center',
+    gap: 2,
   },
   tabIconWrap: {
-    width: 48, height: 36,
-    borderRadius: 18,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
   },
   tabIconWrapActive: {
-    backgroundColor: COLORS.primaryLight,
+    backgroundColor: '#F9EEF3',
   },
-  tabEmoji: { fontSize: 22 },
+  tabEmoji: { fontSize: 20 },
   tabLabel: {
     fontSize: 10,
     fontWeight: '600',
-    color: COLORS.textLight,
+    color: '#9B8FA0',
   },
   tabLabelActive: {
-    color: COLORS.primary,
+    color: '#C9748F',
     fontWeight: '800',
   },
 });
