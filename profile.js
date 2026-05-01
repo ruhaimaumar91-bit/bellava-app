@@ -22,11 +22,11 @@ const MENU_ITEMS = [
 const STATS = [
   { label: 'Days Tracked', value: '47', emoji: '📅' },
   { label: 'Symptoms Logged', value: '23', emoji: '📝' },
-  { label: 'Streak', value: '12🔥', emoji: '🔥' },
+  { label: 'Streak', value: '12', emoji: '🔥' },
 ];
 
 const LANGUAGES = ['English', 'French', 'Arabic', 'Spanish', 'German', 'Portuguese'];
-export default function ProfileScreen({ userName, userEmail, userPlan, onLogout }) {
+export default function ProfileScreen({ userName, userEmail, userPlan, onLogout, onNavigate }) {
   const [notifications, setNotifications] = useState(true);
   const [periodReminders, setPeriodReminders] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
@@ -34,15 +34,27 @@ export default function ProfileScreen({ userName, userEmail, userPlan, onLogout 
   const [selectedLanguage, setSelectedLanguage] = useState('English');
 
   const handleMenuItem = (item) => {
-    if (item.label === 'Language') {
+    if (item.label === 'Privacy & Security') {
+      onNavigate('privacysecurity');
+    } else if (item.label === 'Accessibility') {
+      onNavigate('accessibility');
+    } else if (item.label === 'Language') {
       setShowLanguage(!showLanguage);
     } else if (item.label === 'Subscription Plan') {
-      Alert.alert('Your Plan 💜', `You are currently on the ${userPlan || 'FREE'} plan.\n\nUpgrade to PLUS for £4.99/month or PRO for £7.99/month.`, [
-        { text: 'Maybe Later' },
-        { text: 'Upgrade 💜', onPress: () => Alert.alert('Coming Soon!', 'In-app purchases coming soon! 💜') }
-      ]);
+      Alert.alert(
+        'Your Plan 💜',
+        `You are currently on the ${userPlan || 'FREE'} plan.\n\nUpgrade to PLUS for £4.99/month\nor PRO for £7.99/month.`,
+        [
+          { text: 'Maybe Later' },
+          { text: 'Upgrade 💜', onPress: () => Alert.alert('Coming Soon!', 'In-app purchases coming soon! 💜') }
+        ]
+      );
+    } else if (item.label === 'Notifications') {
+      Alert.alert('Notifications 💜', 'Manage your notification preferences below.');
+    } else if (item.label === 'Personal Information') {
+      Alert.alert('Personal Information 💜', `Name: ${userName || 'Not set'}\nEmail: ${userEmail || 'Not set'}\n\nEditing coming soon!`);
     } else if (item.label === 'Rate Bellava') {
-      Alert.alert('Rate Bellava ⭐', 'Thank you for using Bellava! Please rate us on the App Store.', [
+      Alert.alert('Rate Bellava ⭐', 'Thank you for using Bellava!\nPlease rate us on the App Store.', [
         { text: 'Not Now' },
         { text: 'Rate Now ⭐' }
       ]);
@@ -79,14 +91,17 @@ export default function ProfileScreen({ userName, userEmail, userPlan, onLogout 
             <View style={styles.avatar}>
               <Text style={styles.avatarText}>{initials}</Text>
             </View>
-            <TouchableOpacity style={styles.editAvatarBtn}
-              onPress={() => Alert.alert('Change Photo', 'Photo upload coming soon! 💜')}>
+            <TouchableOpacity
+              style={styles.editAvatarBtn}
+              onPress={() => Alert.alert('Change Photo', 'Photo upload coming soon! 💜')}
+            >
               <Text style={styles.editAvatarIcon}>📷</Text>
             </TouchableOpacity>
           </View>
           <Text style={styles.profileName}>{userName || 'Bellava User'}</Text>
           <Text style={styles.profileEmail}>{userEmail || 'user@bellava.com'}</Text>
-          <View style={[styles.planBadge,
+          <View style={[
+            styles.planBadge,
             userPlan === 'PRO' ? styles.planPro :
             userPlan === 'PLUS' ? styles.planPlus :
             styles.planFree
@@ -96,8 +111,10 @@ export default function ProfileScreen({ userName, userEmail, userPlan, onLogout 
             </Text>
           </View>
           {userPlan === 'FREE' && (
-            <TouchableOpacity style={styles.upgradeBtn}
-              onPress={() => Alert.alert('Upgrade 💜', 'In-app purchases coming soon!')}>
+            <TouchableOpacity
+              style={styles.upgradeBtn}
+              onPress={() => Alert.alert('Upgrade 💜', 'In-app purchases coming soon!')}
+            >
               <Text style={styles.upgradeBtnText}>✨ Upgrade to PLUS — £4.99/mo</Text>
             </TouchableOpacity>
           )}
@@ -206,7 +223,11 @@ export default function ProfileScreen({ userName, userEmail, userPlan, onLogout 
             'Are you sure you want to log out?',
             [
               { text: 'Cancel' },
-              { text: 'Log Out', style: 'destructive', onPress: () => onLogout && onLogout() }
+              {
+                text: 'Log Out',
+                style: 'destructive',
+                onPress: () => onLogout && onLogout()
+              }
             ]
           )}
         >
@@ -245,7 +266,10 @@ const styles = StyleSheet.create({
   editAvatarIcon: { fontSize: 16 },
   profileName: { fontSize: 22, fontWeight: '800', color: '#2D1B2E', marginBottom: 4 },
   profileEmail: { fontSize: 14, color: '#9B8FA0', marginBottom: 12 },
-  planBadge: { borderRadius: 20, paddingHorizontal: 16, paddingVertical: 6, marginBottom: 12 },
+  planBadge: {
+    borderRadius: 20, paddingHorizontal: 16,
+    paddingVertical: 6, marginBottom: 12,
+  },
   planFree: { backgroundColor: '#EDE0E8' },
   planPlus: { backgroundColor: '#F0EAFF' },
   planPro: { backgroundColor: '#FFF3CD' },
@@ -301,10 +325,12 @@ const styles = StyleSheet.create({
   menuLabel: { flex: 1, fontSize: 15, fontWeight: '600', color: '#2D1B2E' },
   menuArrow: { fontSize: 20, color: '#9B8FA0' },
   logoutBtn: {
-    marginHorizontal: 20, marginBottom: 12, backgroundColor: '#fff',
-    borderRadius: 20, padding: 16, alignItems: 'center',
+    marginHorizontal: 20, marginBottom: 12,
+    backgroundColor: '#fff', borderRadius: 20,
+    padding: 16, alignItems: 'center',
     borderWidth: 1.5, borderColor: '#E74C3C',
-    shadowColor: '#E74C3C', shadowOpacity: 0.08, shadowRadius: 8, elevation: 2,
+    shadowColor: '#E74C3C', shadowOpacity: 0.08,
+    shadowRadius: 8, elevation: 2,
   },
   logoutText: { fontSize: 16, fontWeight: '800', color: '#E74C3C' },
   version: {

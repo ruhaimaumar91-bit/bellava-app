@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity,
-  SafeAreaView, StatusBar, Alert,
+  SafeAreaView, StatusBar,
 } from 'react-native';
 
 import SplashScreen from './splashscreen';
@@ -26,6 +26,8 @@ import TrackerScreen from './tracker';
 import AdminScreen from './admin';
 import DisclaimerScreen from './disclaimer';
 import JourneyScreen from './journey';
+import PrivacySecurityScreen from './privacysecurity';
+import AccessibilityScreen from './accessibility';
 
 const COLORS = {
   primary: '#C9748F',
@@ -63,30 +65,18 @@ export default function App() {
     setAppScreen('login');
   };
 
-  // SPLASH
   if (appScreen === 'splash') {
     return <SplashScreen onFinish={() => setAppScreen('onboarding')} />;
   }
 
-  // ONBOARDING
   if (appScreen === 'onboarding') {
-    return (
-      <OnboardingScreen
-        onFinish={() => setAppScreen('disclaimer')}
-      />
-    );
+    return <OnboardingScreen onFinish={() => setAppScreen('disclaimer')} />;
   }
 
-  // DISCLAIMER
   if (appScreen === 'disclaimer') {
-    return (
-      <DisclaimerScreen
-        onAccept={() => setAppScreen('journey')}
-      />
-    );
+    return <DisclaimerScreen onAccept={() => setAppScreen('journey')} />;
   }
 
-  // JOURNEY
   if (appScreen === 'journey') {
     return (
       <JourneyScreen
@@ -98,7 +88,6 @@ export default function App() {
     );
   }
 
-  // SIGNUP
   if (appScreen === 'signup') {
     return (
       <SignupScreen
@@ -113,7 +102,6 @@ export default function App() {
     );
   }
 
-  // LOGIN
   if (appScreen === 'login') {
     return (
       <LoginScreen
@@ -127,10 +115,8 @@ export default function App() {
       />
     );
   }
-  // MAIN APP
   if (appScreen === 'main') {
 
-    // Sub screens
     if (subScreen === 'academy') return <AcademyScreen onBack={() => setSubScreen(null)} />;
     if (subScreen === 'carefinder') return <CarefinderScreen onBack={() => setSubScreen(null)} />;
     if (subScreen === 'symptomchecker') return <SymptomCheckerScreen onBack={() => setSubScreen(null)} />;
@@ -142,6 +128,8 @@ export default function App() {
     if (subScreen === 'notifications') return <NotificationsScreen onBack={() => setSubScreen(null)} />;
     if (subScreen === 'tracker') return <TrackerScreen onBack={() => setSubScreen(null)} />;
     if (subScreen === 'admin') return <AdminScreen onBack={() => setSubScreen(null)} />;
+    if (subScreen === 'privacysecurity') return <PrivacySecurityScreen onBack={() => setSubScreen(null)} />;
+    if (subScreen === 'accessibility') return <AccessibilityScreen onBack={() => setSubScreen(null)} />;
 
     const renderScreen = () => {
       switch (activeTab) {
@@ -213,13 +201,9 @@ export default function App() {
     return (
       <SafeAreaView style={styles.container}>
         <StatusBar barStyle="dark-content" backgroundColor="#FAF0F5" />
-
-        {/* Main Screen Content */}
         <View style={styles.content}>
           {renderScreen()}
         </View>
-
-        {/* Bottom Tab Bar */}
         <View style={styles.tabBar}>
           {TABS.map(tab => (
             <TouchableOpacity
