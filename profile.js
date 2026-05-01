@@ -38,30 +38,29 @@ export default function ProfileScreen({ userName, userEmail, userPlan, onLogout,
       onNavigate('privacysecurity');
     } else if (item.label === 'Accessibility') {
       onNavigate('accessibility');
+    } else if (item.label === 'Subscription Plan') {
+      onNavigate('subscription');
+    } else if (item.label === 'Notifications') {
+      onNavigate('notifications');
     } else if (item.label === 'Language') {
       setShowLanguage(!showLanguage);
-    } else if (item.label === 'Subscription Plan') {
-      Alert.alert(
-        'Your Plan 💜',
-        `You are currently on the ${userPlan || 'FREE'} plan.\n\nUpgrade to PLUS for £4.99/month\nor PRO for £7.99/month.`,
-        [
-          { text: 'Maybe Later' },
-          { text: 'Upgrade 💜', onPress: () => Alert.alert('Coming Soon!', 'In-app purchases coming soon! 💜') }
-        ]
-      );
-    } else if (item.label === 'Notifications') {
-      Alert.alert('Notifications 💜', 'Manage your notification preferences below.');
     } else if (item.label === 'Personal Information') {
-      Alert.alert('Personal Information 💜', `Name: ${userName || 'Not set'}\nEmail: ${userEmail || 'Not set'}\n\nEditing coming soon!`);
+      Alert.alert(
+        'Personal Information 💜',
+        `Name: ${userName || 'Not set'}\nEmail: ${userEmail || 'Not set'}\n\nEditing coming soon!`
+      );
     } else if (item.label === 'Rate Bellava') {
-      Alert.alert('Rate Bellava ⭐', 'Thank you for using Bellava!\nPlease rate us on the App Store.', [
-        { text: 'Not Now' },
-        { text: 'Rate Now ⭐' }
-      ]);
+      Alert.alert(
+        'Rate Bellava ⭐',
+        'Thank you for using Bellava!\nPlease rate us on the App Store.',
+        [{ text: 'Not Now' }, { text: 'Rate Now ⭐' }]
+      );
     } else if (item.label === 'Help & Support') {
-      Alert.alert('Help & Support 💜', 'Email us at support@bellava.com\n\nWe respond within 24 hours!', [
-        { text: 'OK' }
-      ]);
+      Alert.alert(
+        'Help & Support 💜',
+        'Email us at support@bellava.com\n\nWe respond within 24 hours!',
+        [{ text: 'OK' }]
+      );
     } else if (item.label === 'Privacy Policy') {
       Alert.alert('Privacy Policy', 'Visit bellava.com/privacy for our full privacy policy.');
     } else if (item.label === 'Terms of Service') {
@@ -113,9 +112,9 @@ export default function ProfileScreen({ userName, userEmail, userPlan, onLogout,
           {userPlan === 'FREE' && (
             <TouchableOpacity
               style={styles.upgradeBtn}
-              onPress={() => Alert.alert('Upgrade 💜', 'In-app purchases coming soon!')}
+              onPress={() => onNavigate('subscription')}
             >
-              <Text style={styles.upgradeBtnText}>✨ Upgrade to PLUS — £4.99/mo</Text>
+              <Text style={styles.upgradeBtnText}>✨ Upgrade to Pro — $3.99/mo</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -223,11 +222,7 @@ export default function ProfileScreen({ userName, userEmail, userPlan, onLogout,
             'Are you sure you want to log out?',
             [
               { text: 'Cancel' },
-              {
-                text: 'Log Out',
-                style: 'destructive',
-                onPress: () => onLogout && onLogout()
-              }
+              { text: 'Log Out', style: 'destructive', onPress: () => onLogout && onLogout() }
             ]
           )}
         >
