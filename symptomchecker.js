@@ -1,418 +1,369 @@
 import React, { useState } from 'react';
 import {
   View, Text, StyleSheet, ScrollView,
-  TouchableOpacity, SafeAreaView, StatusBar, Modal,
+  TouchableOpacity, SafeAreaView, StatusBar,
+  TextInput, Alert,
 } from 'react-native';
 import COLORS from './colors';
 
 const SYMPTOM_CATEGORIES = [
   {
-    id: 'pain',
-    emoji: '😣',
-    label: 'Pain',
-    color: '#FF6B6B',
-    bg: '#FFF0F0',
-    symptoms: [
-      'Period cramps', 'Lower back pain', 'Pelvic pain', 'Breast tenderness',
-      'Headache / migraine', 'Joint pain', 'Abdominal pain', 'Ovulation pain',
-    ],
+    category: 'Menstrual',
+    emoji: '🌸',
+    color: '#E74C3C',
+    symptoms: ['Heavy bleeding', 'Light bleeding', 'Irregular periods', 'Missed period', 'Painful cramps', 'Spotting between periods', 'Long periods', 'Short periods'],
   },
   {
-    id: 'mood',
-    emoji: '🧠',
-    label: 'Mood',
-    color: '#9B59B6',
-    bg: '#F5EEFF',
-    symptoms: [
-      'Anxiety', 'Low mood / depression', 'Irritability', 'Mood swings',
-      'Feeling overwhelmed', 'Lack of motivation', 'Brain fog', 'Emotional sensitivity',
-    ],
-  },
-  {
-    id: 'body',
-    emoji: '🌡️',
-    label: 'Body',
-    color: '#E67E22',
-    bg: '#FFF5E6',
-    symptoms: [
-      'Bloating', 'Fatigue', 'Nausea', 'Dizziness', 'Spotting',
-      'Hot flushes', 'Chills / cold', 'Night sweats', 'Weight changes',
-    ],
-  },
-  {
-    id: 'skin',
-    emoji: '✨',
-    label: 'Skin & Hair',
-    color: '#E91E8C',
-    bg: '#FFF0F8',
-    symptoms: [
-      'Acne / breakouts', 'Oily skin', 'Dry skin', 'Hair loss / thinning',
-      'Increased body hair', 'Skin sensitivity', 'Nail changes',
-    ],
-  },
-  {
-    id: 'energy',
+    category: 'Pain',
     emoji: '⚡',
-    label: 'Energy & Sleep',
-    color: '#F1C40F',
-    bg: '#FFFDE6',
-    symptoms: [
-      'Insomnia', 'Oversleeping', 'Low energy', 'High energy',
-      'Restless sleep', 'Vivid dreams', 'Afternoon slump',
-    ],
+    color: '#F59E0B',
+    symptoms: ['Pelvic pain', 'Lower back pain', 'Breast tenderness', 'Headache', 'Abdominal pain', 'Joint pain', 'Ovary pain'],
   },
   {
-    id: 'digestion',
-    emoji: '🫁',
-    label: 'Digestion',
+    category: 'Hormonal',
+    emoji: '🔄',
+    color: '#9B59B6',
+    symptoms: ['Mood swings', 'Anxiety', 'Depression', 'Irritability', 'Brain fog', 'Low libido', 'Hot flashes', 'Night sweats'],
+  },
+  {
+    category: 'Digestive',
+    emoji: '🫃',
     color: '#27AE60',
-    bg: '#F0FFF4',
-    symptoms: [
-      'Constipation', 'Diarrhoea', 'Bloating', 'Food cravings',
-      'Loss of appetite', 'Increased appetite', 'Nausea after eating',
-    ],
+    symptoms: ['Bloating', 'Nausea', 'Constipation', 'Diarrhea', 'Appetite changes', 'Food cravings', 'Heartburn'],
+  },
+  {
+    category: 'Energy',
+    emoji: '⚡',
+    color: '#3498DB',
+    symptoms: ['Fatigue', 'Insomnia', 'Excessive sleep', 'Low energy', 'Dizziness', 'Fainting'],
+  },
+  {
+    category: 'Skin & Hair',
+    emoji: '✨',
+    color: '#E67E22',
+    symptoms: ['Acne', 'Hair loss', 'Dry skin', 'Oily skin', 'Excessive hair growth', 'Brittle nails'],
   },
 ];
 
-const INTENSITY_LEVELS = [
-  { value: 1, label: 'Mild', emoji: '😐', color: '#27AE60' },
-  { value: 2, label: 'Moderate', emoji: '😟', color: '#F39C12' },
-  { value: 3, label: 'Severe', emoji: '😣', color: '#E74C3C' },
-];
-
+const CONDITIONS = {
+  'Heavy bleeding': { condition: 'Menorrhagia', urgency: 'medium', advice: 'Heavy bleeding lasting more than 7 days may indicate fibroids, endometriosis or hormonal imbalance. See your GP if this is persistent.' },
+  'Missed period': { condition: 'Amenorrhea', urgency: 'medium', advice: 'Missed periods can be caused by stress, weight changes, PCOS or pregnancy. Take a pregnancy test first then see your GP.' },
+  'Painful cramps': { condition: 'Dysmenorrhea', urgency: 'low', advice: 'Painful cramps are common but severe pain may indicate endometriosis. Try heat therapy and ibuprofen. See GP if pain is debilitating.' },
+  'Pelvic pain': { condition: 'Possible Endometriosis/PCOS', urgency: 'high', advice: 'Persistent pelvic pain needs medical evaluation. Could indicate endometriosis, ovarian cysts or PID. See your GP soon.' },
+  'Hot flashes': { condition: 'Perimenopause/Menopause', urgency: 'low', advice: 'Hot flashes are common during perimenopause. HRT and lifestyle changes can help. Discuss with your GP.' },
+  'Hair loss': { condition: 'Possible PCOS/Thyroid', urgency: 'medium', advice: 'Hair loss in women can indicate hormonal imbalance, PCOS or thyroid issues. Blood tests from GP can help diagnose.' },
+  'Mood swings': { condition: 'Hormonal Imbalance/PMS', urgency: 'low', advice: 'Mood swings are often linked to hormonal changes during your cycle. Severe mood changes may indicate PMDD.' },
+  'Bloating': { condition: 'PMS/IBS', urgency: 'low', advice: 'Bloating around your period is normal. Persistent bloating unrelated to cycle may indicate IBS or other digestive issues.' },
+  'Fatigue': { condition: 'Anaemia/Hormonal', urgency: 'medium', advice: 'Persistent fatigue in women is often linked to iron deficiency anaemia, thyroid issues or hormonal imbalance. Get blood tests.' },
+  'Acne': { condition: 'Hormonal Acne/PCOS', urgency: 'low', advice: 'Hormonal acne often appears on chin and jawline. May be linked to PCOS. Speak to GP about hormonal treatments.' },
+  'Irregular periods': { condition: 'PCOS/Thyroid', urgency: 'medium', advice: 'Irregular periods are a key sign of PCOS or thyroid dysfunction. See your GP for hormone blood tests.' },
+  'Night sweats': { condition: 'Perimenopause/Infection', urgency: 'medium', advice: 'Night sweats can indicate perimenopause, infection or rarely lymphoma. See GP if persistent and unexplained.' },
+  'Low libido': { condition: 'Hormonal Imbalance', urgency: 'low', advice: 'Low libido can be caused by low oestrogen, testosterone, stress or relationship factors. Discuss with GP or sex therapist.' },
+  'Breast tenderness': { condition: 'PMS/Hormonal', urgency: 'low', advice: 'Breast tenderness before period is normal PMS. Unexplained lumps or one-sided pain should be checked by GP immediately.' },
+  'Anxiety': { condition: 'PMDD/Mental Health', urgency: 'medium', advice: 'Cycle-linked anxiety may indicate PMDD. Please speak to your GP or a mental health professional. You deserve support.' },
+};
 export default function SymptomCheckerScreen({ onBack }) {
-  const [activeCategory, setActiveCategory] = useState('pain');
-  const [selectedSymptoms, setSelectedSymptoms] = useState({});
+  const [searchText, setSearchText] = useState('');
+  const [selectedSymptoms, setSelectedSymptoms] = useState([]);
+  const [activeCategory, setActiveCategory] = useState('All');
   const [showResults, setShowResults] = useState(false);
 
-  const currentCategory = SYMPTOM_CATEGORIES.find(c => c.id === activeCategory);
-  const totalSelected = Object.keys(selectedSymptoms).length;
-
   const toggleSymptom = (symptom) => {
-    setSelectedSymptoms(prev => {
-      const existing = prev[symptom];
-      if (existing) {
-        const updated = { ...prev };
-        delete updated[symptom];
-        return updated;
-      }
-      return { ...prev, [symptom]: 1 };
-    });
+    setSelectedSymptoms(prev =>
+      prev.includes(symptom)
+        ? prev.filter(s => s !== symptom)
+        : [...prev, symptom]
+    );
+    setShowResults(false);
   };
 
-  const setIntensity = (symptom, value) => {
-    setSelectedSymptoms(prev => ({ ...prev, [symptom]: value }));
+  const allSymptoms = SYMPTOM_CATEGORIES.flatMap(c => c.symptoms);
+
+  const filteredCategories = SYMPTOM_CATEGORIES.map(cat => ({
+    ...cat,
+    symptoms: cat.symptoms.filter(s =>
+      s.toLowerCase().includes(searchText.toLowerCase())
+    ),
+  })).filter(cat => cat.symptoms.length > 0);
+
+  const getResults = () => {
+    const results = selectedSymptoms.map(symptom => ({
+      symptom,
+      ...(CONDITIONS[symptom] || {
+        condition: 'General Symptom',
+        urgency: 'low',
+        advice: 'Monitor this symptom and speak to your GP if it persists or worsens.',
+      }),
+    }));
+    return results;
   };
 
-  const getAdvice = () => {
-    const symptoms = Object.keys(selectedSymptoms);
-    const hasPain = symptoms.some(s =>
-      ['Period cramps', 'Pelvic pain', 'Lower back pain', 'Abdominal pain'].includes(s)
-    );
-    const hasMood = symptoms.some(s =>
-      ['Anxiety', 'Low mood / depression', 'Mood swings', 'Irritability'].includes(s)
-    );
-    const hasSevere = Object.values(selectedSymptoms).some(v => v === 3);
-    let advice = [];
-    if (hasSevere) {
-      advice.push({
-        emoji: '⚠️',
-        title: 'Consider seeing a doctor',
-        text: 'You have marked some symptoms as severe. It is always worth speaking to a healthcare professional if symptoms are affecting your daily life.',
-        color: '#E74C3C',
-      });
-    }
-    if (hasPain) {
-      advice.push({
-        emoji: '🌡️',
-        title: 'Managing pain',
-        text: 'A hot water bottle, gentle movement, and anti-inflammatory pain relief (like ibuprofen) can help. If pain is severe or unusual, speak to your GP.',
-        color: '#FF6B6B',
-      });
-    }
-    if (hasMood) {
-      advice.push({
-        emoji: '🧠',
-        title: 'Supporting your mood',
-        text: 'Mood changes are common before your period. Gentle exercise, sunlight, and talking to someone you trust can all help. If low mood persists, speak to your GP.',
-        color: '#9B59B6',
-      });
-    }
-    advice.push({
-      emoji: '💜',
-      title: 'Track your patterns',
-      text: 'The more you track, the better Bellava can help you understand your cycle. Try logging symptoms for 2-3 months to spot patterns.',
-      color: COLORS.primary,
-    });
-    return advice;
+  const getUrgencyColor = (urgency) => {
+    if (urgency === 'high') return '#E74C3C';
+    if (urgency === 'medium') return '#F59E0B';
+    return '#27AE60';
   };
+
+  const getUrgencyLabel = (urgency) => {
+    if (urgency === 'high') return '🚨 See Doctor Soon';
+    if (urgency === 'medium') return '⚠️ Monitor Closely';
+    return '✅ Usually Normal';
+  };
+
+  const results = getResults();
+  const hasHighUrgency = results.some(r => r.urgency === 'high');
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#FAF0F5" />
 
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={onBack} style={styles.backBtn}>
-          <Text style={styles.backArrow}>←</Text>
+          <Text style={styles.backText}>← Back</Text>
         </TouchableOpacity>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.headerTitle}>Symptom Checker</Text>
-          <Text style={styles.headerSub}>Track how you feel today</Text>
-        </View>
-        {totalSelected > 0 && (
-          <View style={styles.badge}>
-            <Text style={styles.badgeText}>{totalSelected}</Text>
-          </View>
-        )}
+        <Text style={styles.headerTitle}>Symptom Checker</Text>
+        <View style={{ width: 60 }} />
       </View>
 
-      {/* Category Tabs */}
-      <ScrollView
-        horizontal showsHorizontalScrollIndicator={false}
-        style={styles.tabs}
-        contentContainerStyle={styles.tabsContent}
-      >
-        {SYMPTOM_CATEGORIES.map(cat => (
-          <TouchableOpacity
-            key={cat.id}
-            style={[styles.tab, activeCategory === cat.id && { backgroundColor: cat.color }]}
-            onPress={() => setActiveCategory(cat.id)}
-          >
-            <Text style={styles.tabEmoji}>{cat.emoji}</Text>
-            <Text style={[styles.tabLabel, activeCategory === cat.id && { color: '#fff' }]}>
-              {cat.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+      <ScrollView showsVerticalScrollIndicator={false}>
 
-      {/* Symptoms List */}
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <Text style={styles.sectionTitle}>
-          {currentCategory.emoji} {currentCategory.label} Symptoms
-        </Text>
+        {/* Disclaimer */}
+        <View style={styles.disclaimer}>
+          <Text style={styles.disclaimerText}>
+            ⚠️ This tool is for information only. Always consult a qualified healthcare professional for medical advice.
+          </Text>
+        </View>
 
-        {currentCategory.symptoms.map(symptom => {
-          const isSelected = !!selectedSymptoms[symptom];
-          const intensity = selectedSymptoms[symptom];
-          return (
-            <View
-              key={symptom}
-              style={[
-                styles.symptomCard,
-                isSelected && { borderColor: currentCategory.color, borderWidth: 2 },
-              ]}
-            >
-              <TouchableOpacity
-                style={styles.symptomRow}
-                onPress={() => toggleSymptom(symptom)}
-              >
-                <View style={[
-                  styles.checkbox,
-                  isSelected && { backgroundColor: currentCategory.color, borderColor: currentCategory.color },
-                ]}>
-                  {isSelected && <Text style={styles.checkmark}>✓</Text>}
-                </View>
-                <Text style={[
-                  styles.symptomLabel,
-                  isSelected && { color: currentCategory.color, fontWeight: '700' },
-                ]}>
-                  {symptom}
-                </Text>
+        {/* Search */}
+        <View style={styles.searchBox}>
+          <Text style={styles.searchIcon}>🔍</Text>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search symptoms..."
+            placeholderTextColor={COLORS.textLight}
+            value={searchText}
+            onChangeText={setSearchText}
+          />
+          {searchText.length > 0 && (
+            <TouchableOpacity onPress={() => setSearchText('')}>
+              <Text style={styles.clearText}>✕</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {/* Selected Symptoms */}
+        {selectedSymptoms.length > 0 && (
+          <View style={styles.selectedBox}>
+            <View style={styles.selectedHeader}>
+              <Text style={styles.selectedTitle}>Selected ({selectedSymptoms.length})</Text>
+              <TouchableOpacity onPress={() => { setSelectedSymptoms([]); setShowResults(false); }}>
+                <Text style={styles.clearAll}>Clear All</Text>
               </TouchableOpacity>
+            </View>
+            <View style={styles.selectedTags}>
+              {selectedSymptoms.map(s => (
+                <TouchableOpacity
+                  key={s}
+                  style={styles.selectedTag}
+                  onPress={() => toggleSymptom(s)}
+                >
+                  <Text style={styles.selectedTagText}>{s} ✕</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            <TouchableOpacity
+              style={styles.checkBtn}
+              onPress={() => setShowResults(true)}
+            >
+              <Text style={styles.checkBtnText}>🔍 Check My Symptoms</Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
-              {isSelected && (
-                <View style={styles.intensityRow}>
-                  <Text style={styles.intensityTitle}>How severe?</Text>
-                  <View style={styles.intensityBtns}>
-                    {INTENSITY_LEVELS.map(level => (
-                      <TouchableOpacity
-                        key={level.value}
-                        style={[
-                          styles.intensityBtn,
-                          intensity === level.value && { backgroundColor: level.color },
-                        ]}
-                        onPress={() => setIntensity(symptom, level.value)}
-                      >
-                        <Text style={styles.intensityEmoji}>{level.emoji}</Text>
-                        <Text style={[
-                          styles.intensityLabel,
-                          intensity === level.value && { color: '#fff' },
-                        ]}>
-                          {level.label}
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
+        {/* Results */}
+        {showResults && results.length > 0 && (
+          <View style={styles.resultsBox}>
+            <Text style={styles.resultsTitle}>📋 Your Results</Text>
+            {hasHighUrgency && (
+              <View style={styles.urgentBanner}>
+                <Text style={styles.urgentText}>🚨 Some symptoms need urgent attention. Please see a doctor soon.</Text>
+              </View>
+            )}
+            {results.map((result, i) => (
+              <View key={i} style={[styles.resultCard, { borderLeftColor: getUrgencyColor(result.urgency) }]}>
+                <View style={styles.resultHeader}>
+                  <Text style={styles.resultSymptom}>{result.symptom}</Text>
+                  <View style={[styles.urgencyBadge, { backgroundColor: getUrgencyColor(result.urgency) + '22' }]}>
+                    <Text style={[styles.urgencyText, { color: getUrgencyColor(result.urgency) }]}>
+                      {getUrgencyLabel(result.urgency)}
+                    </Text>
                   </View>
                 </View>
-              )}
-            </View>
-          );
-        })}
-        <View style={{ height: 120 }} />
-      </ScrollView>
-
-      {/* Bottom Button */}
-      {totalSelected > 0 && (
-        <View style={styles.bottomBar}>
-          <TouchableOpacity style={styles.resultsBtn} onPress={() => setShowResults(true)}>
-            <Text style={styles.resultsBtnText}>
-              View Advice ({totalSelected} symptom{totalSelected !== 1 ? 's' : ''}) 💜
-            </Text>
-          </TouchableOpacity>
-        </View>
-      )}
-
-      {/* Results Modal */}
-      <Modal visible={showResults} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalSheet}>
-            <View style={styles.modalHandle} />
-            <ScrollView showsVerticalScrollIndicator={false}>
-              <Text style={styles.modalTitle}>Your Symptom Summary 💜</Text>
-              <View style={styles.selectedList}>
-                <Text style={styles.selectedHeader}>Symptoms logged today:</Text>
-                {Object.entries(selectedSymptoms).map(([symptom, intensity]) => {
-                  const level = INTENSITY_LEVELS.find(l => l.value === intensity);
-                  return (
-                    <View key={symptom} style={styles.selectedItem}>
-                      <Text style={styles.selectedSymptom}>• {symptom}</Text>
-                      <Text style={[styles.selectedIntensity, { color: level.color }]}>
-                        {level.emoji} {level.label}
-                      </Text>
-                    </View>
-                  );
-                })}
+                <Text style={styles.resultCondition}>Possible: {result.condition}</Text>
+                <Text style={styles.resultAdvice}>{result.advice}</Text>
               </View>
-              <Text style={styles.adviceHeader}>💡 Personalised Advice</Text>
-              {getAdvice().map((advice, i) => (
-                <View key={i} style={[styles.adviceCard, { borderLeftColor: advice.color }]}>
-                  <Text style={styles.adviceTitle}>{advice.emoji} {advice.title}</Text>
-                  <Text style={styles.adviceText}>{advice.text}</Text>
-                </View>
-              ))}
-              <Text style={styles.disclaimer}>
-                ⚠️ This is general health information only. Bellava is not a substitute for medical advice. Always consult a qualified healthcare professional for diagnosis and treatment.
-              </Text>
-              <TouchableOpacity style={styles.closeBtn} onPress={() => setShowResults(false)}>
-                <Text style={styles.closeBtnText}>Close</Text>
+            ))}
+            <View style={styles.bellaCard}>
+              <Text style={styles.bellaCardText}>💜 Want to discuss your symptoms with Bella AI?</Text>
+              <TouchableOpacity
+                style={styles.bellaBtn}
+                onPress={() => Alert.alert('Bella AI 💜', 'Go to the AI Chat tab to talk to Bella about your symptoms!')}
+              >
+                <Text style={styles.bellaBtnText}>Ask Bella →</Text>
               </TouchableOpacity>
-              <View style={{ height: 40 }} />
-            </ScrollView>
+            </View>
           </View>
+        )}
+
+        {/* Symptom Categories */}
+        {filteredCategories.map(cat => (
+          <View key={cat.category} style={styles.categorySection}>
+            <View style={styles.categoryHeader}>
+              <Text style={styles.categoryEmoji}>{cat.emoji}</Text>
+              <Text style={[styles.categoryTitle, { color: cat.color }]}>{cat.category}</Text>
+            </View>
+            <View style={styles.symptomsGrid}>
+              {cat.symptoms.map(symptom => (
+                <TouchableOpacity
+                  key={symptom}
+                  style={[
+                    styles.symptomBtn,
+                    selectedSymptoms.includes(symptom) && { backgroundColor: cat.color, borderColor: cat.color }
+                  ]}
+                  onPress={() => toggleSymptom(symptom)}
+                >
+                  <Text style={[
+                    styles.symptomText,
+                    selectedSymptoms.includes(symptom) && styles.symptomTextActive
+                  ]}>
+                    {symptom}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        ))}
+
+        {/* Bottom Disclaimer */}
+        <View style={styles.bottomDisclaimer}>
+          <Text style={styles.bottomDisclaimerText}>
+            🏥 In an emergency always call 999 (UK) or your local emergency number.{'\n\n'}
+            This symptom checker is not a diagnostic tool. Always seek professional medical advice.
+          </Text>
         </View>
-      </Modal>
+
+        <View style={{ height: 100 }} />
+      </ScrollView>
     </SafeAreaView>
   );
 }
-
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: COLORS.background },
+  container: { flex: 1, backgroundColor: '#FAF0F5' },
   header: {
-    flexDirection: 'row', alignItems: 'center',
-    paddingHorizontal: 20, paddingVertical: 16,
-    backgroundColor: COLORS.white,
-    borderBottomWidth: 1, borderBottomColor: COLORS.border, gap: 12,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: 20, paddingTop: 16, paddingBottom: 12,
   },
-  backBtn: {
-    width: 40, height: 40, borderRadius: 20,
-    backgroundColor: COLORS.background,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  backArrow: { fontSize: 22, color: COLORS.primary },
-  headerTitle: { fontSize: 20, fontWeight: '800', color: COLORS.text },
-  headerSub: { fontSize: 13, color: COLORS.textLight, marginTop: 2 },
-  badge: {
-    marginLeft: 'auto', backgroundColor: COLORS.primary,
-    width: 32, height: 32, borderRadius: 16,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  badgeText: { color: '#fff', fontWeight: '700', fontSize: 14 },
-  tabs: { maxHeight: 70, backgroundColor: COLORS.white },
-  tabsContent: { paddingHorizontal: 16, paddingVertical: 12, gap: 8 },
-  tab: {
-    flexDirection: 'row', alignItems: 'center', gap: 6,
-    paddingHorizontal: 14, paddingVertical: 8, borderRadius: 50,
-    backgroundColor: COLORS.background,
-  },
-  tabEmoji: { fontSize: 16 },
-  tabLabel: { fontSize: 13, fontWeight: '600', color: COLORS.text },
-  content: { flex: 1, padding: 16 },
-  sectionTitle: { fontSize: 17, fontWeight: '700', color: COLORS.text, marginBottom: 14 },
-  symptomCard: {
-    backgroundColor: COLORS.white, borderRadius: 16,
-    padding: 16, marginBottom: 10,
-    borderWidth: 1.5, borderColor: COLORS.border,
-  },
-  symptomRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  checkbox: {
-    width: 24, height: 24, borderRadius: 6,
-    borderWidth: 2, borderColor: COLORS.border,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  checkmark: { color: '#fff', fontWeight: '700', fontSize: 14 },
-  symptomLabel: { fontSize: 15, color: COLORS.text, flex: 1 },
-  intensityRow: {
-    marginTop: 12, paddingTop: 12,
-    borderTopWidth: 1, borderTopColor: COLORS.border,
-  },
-  intensityTitle: { fontSize: 13, color: COLORS.textLight, marginBottom: 8 },
-  intensityBtns: { flexDirection: 'row', gap: 8 },
-  intensityBtn: {
-    flex: 1, alignItems: 'center', paddingVertical: 8,
-    borderRadius: 12, backgroundColor: COLORS.background,
-  },
-  intensityEmoji: { fontSize: 18 },
-  intensityLabel: { fontSize: 12, fontWeight: '600', color: COLORS.text, marginTop: 2 },
-  bottomBar: {
-    padding: 16, backgroundColor: COLORS.white,
-    borderTopWidth: 1, borderTopColor: COLORS.border,
-  },
-  resultsBtn: {
-    backgroundColor: COLORS.primary, borderRadius: 50,
-    paddingVertical: 16, alignItems: 'center',
-  },
-  resultsBtnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
-  modalOverlay: {
-    flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end',
-  },
-  modalSheet: {
-    backgroundColor: COLORS.white, borderTopLeftRadius: 28,
-    borderTopRightRadius: 28, padding: 24, maxHeight: '90%',
-  },
-  modalHandle: {
-    width: 40, height: 4, borderRadius: 2,
-    backgroundColor: COLORS.border, alignSelf: 'center', marginBottom: 20,
-  },
-  modalTitle: { fontSize: 22, fontWeight: '800', color: COLORS.text, marginBottom: 16 },
-  selectedList: {
-    backgroundColor: COLORS.background, borderRadius: 16,
-    padding: 16, marginBottom: 20,
-  },
-  selectedHeader: { fontSize: 14, fontWeight: '700', color: COLORS.text, marginBottom: 10 },
-  selectedItem: {
-    flexDirection: 'row', justifyContent: 'space-between',
-    alignItems: 'center', paddingVertical: 6,
-  },
-  selectedSymptom: { fontSize: 14, color: COLORS.text, flex: 1 },
-  selectedIntensity: { fontSize: 13, fontWeight: '600' },
-  adviceHeader: { fontSize: 17, fontWeight: '800', color: COLORS.text, marginBottom: 12 },
-  adviceCard: {
-    backgroundColor: COLORS.white, borderRadius: 16,
-    padding: 16, marginBottom: 12, borderLeftWidth: 4,
-    shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 8, elevation: 2,
-  },
-  adviceTitle: { fontSize: 15, fontWeight: '700', color: COLORS.text, marginBottom: 6 },
-  adviceText: { fontSize: 14, color: COLORS.textLight, lineHeight: 21 },
+  backBtn: { padding: 8 },
+  backText: { fontSize: 16, color: '#C9748F', fontWeight: '700' },
+  headerTitle: { fontSize: 18, fontWeight: '800', color: '#2D1B2E' },
   disclaimer: {
-    fontSize: 12, color: COLORS.textLight, lineHeight: 18,
-    backgroundColor: '#FFF8E6', borderRadius: 12,
-    padding: 14, marginTop: 8, marginBottom: 16,
+    marginHorizontal: 20, marginBottom: 16,
+    backgroundColor: '#FFF3CD', borderRadius: 12,
+    padding: 12, borderLeftWidth: 4, borderLeftColor: '#F59E0B',
   },
-  closeBtn: {
-    borderWidth: 2, borderColor: COLORS.primary, borderRadius: 50,
+  disclaimerText: { fontSize: 13, color: '#856404', lineHeight: 20 },
+  searchBox: {
+    flexDirection: 'row', alignItems: 'center',
+    backgroundColor: '#fff', borderRadius: 16,
+    marginHorizontal: 20, marginBottom: 16,
+    paddingHorizontal: 14, paddingVertical: 12,
+    shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 6, elevation: 2,
+  },
+  searchIcon: { fontSize: 16, marginRight: 8 },
+  searchInput: { flex: 1, fontSize: 15, color: '#2D1B2E' },
+  clearText: { fontSize: 16, color: '#9B8FA0', fontWeight: '700' },
+  selectedBox: {
+    backgroundColor: '#fff', borderRadius: 20,
+    marginHorizontal: 20, marginBottom: 16, padding: 16,
+    shadowColor: '#C9748F', shadowOpacity: 0.1, shadowRadius: 8, elevation: 3,
+  },
+  selectedHeader: {
+    flexDirection: 'row', justifyContent: 'space-between',
+    alignItems: 'center', marginBottom: 10,
+  },
+  selectedTitle: { fontSize: 15, fontWeight: '800', color: '#2D1B2E' },
+  clearAll: { fontSize: 13, fontWeight: '700', color: '#E74C3C' },
+  selectedTags: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 14 },
+  selectedTag: {
+    backgroundColor: '#C9748F', borderRadius: 20,
+    paddingHorizontal: 12, paddingVertical: 6,
+  },
+  selectedTagText: { color: '#fff', fontSize: 13, fontWeight: '600' },
+  checkBtn: {
+    backgroundColor: '#C9748F', borderRadius: 50,
     paddingVertical: 14, alignItems: 'center',
   },
-  closeBtnText: { color: COLORS.primary, fontWeight: '700', fontSize: 16 },
+  checkBtnText: { color: '#fff', fontWeight: '800', fontSize: 15 },
+  resultsBox: {
+    marginHorizontal: 20, marginBottom: 20,
+  },
+  resultsTitle: { fontSize: 18, fontWeight: '800', color: '#2D1B2E', marginBottom: 12 },
+  urgentBanner: {
+    backgroundColor: '#FFE8E8', borderRadius: 12,
+    padding: 12, marginBottom: 12,
+    borderLeftWidth: 4, borderLeftColor: '#E74C3C',
+  },
+  urgentText: { fontSize: 13, color: '#E74C3C', fontWeight: '700', lineHeight: 20 },
+  resultCard: {
+    backgroundColor: '#fff', borderRadius: 16,
+    padding: 16, marginBottom: 10,
+    borderLeftWidth: 4,
+    shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 6, elevation: 2,
+  },
+  resultHeader: {
+    flexDirection: 'row', justifyContent: 'space-between',
+    alignItems: 'flex-start', marginBottom: 6, gap: 8,
+  },
+  resultSymptom: { fontSize: 15, fontWeight: '800', color: '#2D1B2E', flex: 1 },
+  urgencyBadge: { borderRadius: 10, paddingHorizontal: 8, paddingVertical: 4 },
+  urgencyText: { fontSize: 11, fontWeight: '700' },
+  resultCondition: { fontSize: 13, fontWeight: '700', color: '#9B59B6', marginBottom: 6 },
+  resultAdvice: { fontSize: 13, color: '#2D1B2E', lineHeight: 20 },
+  bellaCard: {
+    backgroundColor: '#2D1B2E', borderRadius: 16,
+    padding: 16, marginTop: 8,
+    flexDirection: 'row', alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  bellaCardText: { flex: 1, fontSize: 13, color: '#fff', lineHeight: 20 },
+  bellaBtn: {
+    backgroundColor: '#C9748F', borderRadius: 20,
+    paddingHorizontal: 14, paddingVertical: 8, marginLeft: 10,
+  },
+  bellaBtnText: { color: '#fff', fontWeight: '700', fontSize: 13 },
+  categorySection: { marginHorizontal: 20, marginBottom: 20 },
+  categoryHeader: {
+    flexDirection: 'row', alignItems: 'center',
+    gap: 8, marginBottom: 10,
+  },
+  categoryEmoji: { fontSize: 20 },
+  categoryTitle: { fontSize: 16, fontWeight: '800' },
+  symptomsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  symptomBtn: {
+    borderWidth: 1.5, borderColor: '#EDE0E8',
+    borderRadius: 20, paddingHorizontal: 14,
+    paddingVertical: 8, backgroundColor: '#fff',
+  },
+  symptomText: { fontSize: 13, color: '#2D1B2E', fontWeight: '600' },
+  symptomTextActive: { color: '#fff' },
+  bottomDisclaimer: {
+    marginHorizontal: 20, marginBottom: 16,
+    backgroundColor: '#F0EAFF', borderRadius: 16,
+    padding: 16,
+  },
+  bottomDisclaimerText: {
+    fontSize: 13, color: '#9B59B6',
+    lineHeight: 22, textAlign: 'center',
+  },
 });

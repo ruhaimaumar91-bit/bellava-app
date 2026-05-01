@@ -1,444 +1,397 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import {
   View, Text, StyleSheet, ScrollView,
   TouchableOpacity, SafeAreaView, StatusBar,
-  TextInput, Modal,
+  TextInput, Alert,
 } from 'react-native';
 import COLORS from './colors';
 
 const BABY_NAMES = [
   { name: 'Amara', gender: 'girl', origin: 'African', meaning: 'Grace and eternal beauty', popular: true },
-  { name: 'Sofia', gender: 'girl', origin: 'Greek', meaning: 'Wisdom', popular: true },
-  { name: 'Aisha', gender: 'girl', origin: 'Arabic', meaning: 'Living and prosperous', popular: true },
-  { name: 'Isla', gender: 'girl', origin: 'Scottish', meaning: 'Island', popular: true },
-  { name: 'Zara', gender: 'girl', origin: 'Arabic', meaning: 'Blossoming flower', popular: true },
-  { name: 'Olivia', gender: 'girl', origin: 'Latin', meaning: 'Olive tree — symbol of peace', popular: true },
-  { name: 'Fatima', gender: 'girl', origin: 'Arabic', meaning: 'One who abstains', popular: false },
-  { name: 'Imani', gender: 'girl', origin: 'Swahili', meaning: 'Faith and belief', popular: false },
-  { name: 'Luna', gender: 'girl', origin: 'Latin', meaning: 'Moon', popular: true },
+  { name: 'Aria', gender: 'girl', origin: 'Italian', meaning: 'Air, song or melody', popular: true },
+  { name: 'Aisha', gender: 'girl', origin: 'Arabic', meaning: 'Alive and well', popular: true },
+  { name: 'Aurora', gender: 'girl', origin: 'Latin', meaning: 'Dawn, new beginnings', popular: true },
+  { name: 'Amelia', gender: 'girl', origin: 'English', meaning: 'Industrious and striving', popular: true },
+  { name: 'Aaliya', gender: 'girl', origin: 'Arabic', meaning: 'Exalted, sublime', popular: false },
+  { name: 'Bella', gender: 'girl', origin: 'Italian', meaning: 'Beautiful', popular: true },
+  { name: 'Beatrice', gender: 'girl', origin: 'Latin', meaning: 'She who brings happiness', popular: false },
+  { name: 'Celeste', gender: 'girl', origin: 'French', meaning: 'Heavenly, of the sky', popular: false },
+  { name: 'Charlotte', gender: 'girl', origin: 'French', meaning: 'Free woman, strong', popular: true },
+  { name: 'Clara', gender: 'girl', origin: 'Latin', meaning: 'Bright and clear', popular: true },
+  { name: 'Chloe', gender: 'girl', origin: 'Greek', meaning: 'Blooming, fertility', popular: true },
+  { name: 'Dalia', gender: 'girl', origin: 'Arabic', meaning: 'Gentle, a branch', popular: false },
+  { name: 'Diana', gender: 'girl', origin: 'Latin', meaning: 'Divine, goddess of the moon', popular: false },
+  { name: 'Elena', gender: 'girl', origin: 'Greek', meaning: 'Bright, shining light', popular: true },
+  { name: 'Elara', gender: 'girl', origin: 'Greek', meaning: 'Happy, joyful', popular: false },
+  { name: 'Eva', gender: 'girl', origin: 'Hebrew', meaning: 'Life, living', popular: true },
+  { name: 'Fatima', gender: 'girl', origin: 'Arabic', meaning: 'Captivating, one who abstains', popular: true },
+  { name: 'Florence', gender: 'girl', origin: 'Latin', meaning: 'Flourishing, prosperous', popular: false },
+  { name: 'Freya', gender: 'girl', origin: 'Norse', meaning: 'Goddess of love and beauty', popular: true },
+  { name: 'Grace', gender: 'girl', origin: 'English', meaning: 'Elegance, divine grace', popular: true },
+  { name: 'Hana', gender: 'girl', origin: 'Arabic', meaning: 'Happiness and bliss', popular: false },
+  { name: 'Isla', gender: 'girl', origin: 'Scottish', meaning: 'Island, serene', popular: true },
+  { name: 'Imani', gender: 'girl', origin: 'African', meaning: 'Faith and belief', popular: false },
+  { name: 'Jasmine', gender: 'girl', origin: 'Persian', meaning: 'Gift from God, fragrant flower', popular: true },
+  { name: 'Layla', gender: 'girl', origin: 'Arabic', meaning: 'Night, dark beauty', popular: true },
+  { name: 'Luna', gender: 'girl', origin: 'Latin', meaning: 'Moon, mystical', popular: true },
+  { name: 'Lena', gender: 'girl', origin: 'Greek', meaning: 'Bright, shining', popular: false },
+  { name: 'Mia', gender: 'girl', origin: 'Scandinavian', meaning: 'Mine, beloved', popular: true },
+  { name: 'Maya', gender: 'girl', origin: 'Hebrew', meaning: 'Water, illusion', popular: true },
   { name: 'Nadia', gender: 'girl', origin: 'Slavic', meaning: 'Hope', popular: false },
-  { name: 'Layla', gender: 'girl', origin: 'Arabic', meaning: 'Night beauty', popular: true },
-  { name: 'Yasmin', gender: 'girl', origin: 'Persian', meaning: 'Jasmine flower', popular: false },
-  { name: 'Nia', gender: 'girl', origin: 'Swahili', meaning: 'Purpose', popular: false },
-  { name: 'Emilia', gender: 'girl', origin: 'Latin', meaning: 'To strive or excel', popular: true },
-  { name: 'Seren', gender: 'girl', origin: 'Welsh', meaning: 'Star', popular: false },
-  { name: 'Adaeze', gender: 'girl', origin: 'Igbo', meaning: 'Daughter of a king', popular: false },
-  { name: 'Mia', gender: 'girl', origin: 'Scandinavian', meaning: 'Mine or beloved', popular: true },
-  { name: 'Rahima', gender: 'girl', origin: 'Arabic', meaning: 'Merciful and compassionate', popular: false },
-  { name: 'Elara', gender: 'girl', origin: 'Greek', meaning: 'Bright and shining one', popular: false },
-  { name: 'Nour', gender: 'girl', origin: 'Arabic', meaning: 'Light', popular: false },
-  { name: 'Aurora', gender: 'girl', origin: 'Latin', meaning: 'Dawn — new beginnings', popular: true },
-  { name: 'Freya', gender: 'girl', origin: 'Norse', meaning: 'Goddess of love', popular: true },
-  { name: 'Miriam', gender: 'girl', origin: 'Hebrew', meaning: 'Wished-for child', popular: false },
-  { name: 'Aaliya', gender: 'girl', origin: 'Arabic', meaning: 'Exalted and sublime', popular: false },
-  { name: 'Celeste', gender: 'girl', origin: 'Latin', meaning: 'Heavenly', popular: false },
-  { name: 'Adanna', gender: 'girl', origin: 'Igbo', meaning: 'Her father\'s daughter', popular: false },
-  { name: 'Blessing', gender: 'girl', origin: 'English', meaning: 'Gift from God', popular: false },
-  { name: 'Violet', gender: 'girl', origin: 'Latin', meaning: 'Purple flower', popular: true },
+  { name: 'Noor', gender: 'girl', origin: 'Arabic', meaning: 'Light, divine light', popular: true },
+  { name: 'Olivia', gender: 'girl', origin: 'Latin', meaning: 'Olive tree, peace', popular: true },
+  { name: 'Phoebe', gender: 'girl', origin: 'Greek', meaning: 'Bright, radiant', popular: false },
+  { name: 'Rose', gender: 'girl', origin: 'English', meaning: 'The flower, love', popular: true },
+  { name: 'Rania', gender: 'girl', origin: 'Arabic', meaning: 'Queenly, gazing', popular: false },
+  { name: 'Sofia', gender: 'girl', origin: 'Greek', meaning: 'Wisdom', popular: true },
+  { name: 'Sara', gender: 'girl', origin: 'Hebrew', meaning: 'Princess, noble lady', popular: true },
+  { name: 'Sienna', gender: 'girl', origin: 'Italian', meaning: 'Orange-red, earthy', popular: false },
+  { name: 'Zara', gender: 'girl', origin: 'Arabic', meaning: 'Blossom, flower', popular: true },
+  { name: 'Zoe', gender: 'girl', origin: 'Greek', meaning: 'Life, alive', popular: true },
+  { name: 'Adam', gender: 'boy', origin: 'Hebrew', meaning: 'Son of the earth', popular: true },
+  { name: 'Amir', gender: 'boy', origin: 'Arabic', meaning: 'Prince, leader', popular: true },
+  { name: 'Arthur', gender: 'boy', origin: 'Celtic', meaning: 'Bear, strong', popular: true },
+  { name: 'Benjamin', gender: 'boy', origin: 'Hebrew', meaning: 'Son of the right hand', popular: true },
+  { name: 'Caleb', gender: 'boy', origin: 'Hebrew', meaning: 'Faithful, devoted', popular: false },
+  { name: 'Daniel', gender: 'boy', origin: 'Hebrew', meaning: 'God is my judge', popular: true },
+  { name: 'David', gender: 'boy', origin: 'Hebrew', meaning: 'Beloved', popular: true },
   { name: 'Elijah', gender: 'boy', origin: 'Hebrew', meaning: 'My God is Yahweh', popular: true },
-  { name: 'Omar', gender: 'boy', origin: 'Arabic', meaning: 'Flourishing and long-lived', popular: true },
-  { name: 'Kofi', gender: 'boy', origin: 'Akan', meaning: 'Born on Friday', popular: false },
-  { name: 'Luca', gender: 'boy', origin: 'Italian', meaning: 'Bringer of light', popular: true },
-  { name: 'Idris', gender: 'boy', origin: 'Welsh / Arabic', meaning: 'Interpreter, prophet', popular: false },
-  { name: 'Theo', gender: 'boy', origin: 'Greek', meaning: 'Gift of God', popular: true },
-  { name: 'Zion', gender: 'boy', origin: 'Hebrew', meaning: 'Highest point', popular: false },
-  { name: 'Noah', gender: 'boy', origin: 'Hebrew', meaning: 'Rest and comfort', popular: true },
-  { name: 'Tariq', gender: 'boy', origin: 'Arabic', meaning: 'Morning star', popular: false },
-  { name: 'Felix', gender: 'boy', origin: 'Latin', meaning: 'Happy and fortunate', popular: true },
-  { name: 'Emeka', gender: 'boy', origin: 'Igbo', meaning: 'Great deeds', popular: false },
-  { name: 'Malik', gender: 'boy', origin: 'Arabic', meaning: 'King', popular: false },
-  { name: 'Ibrahim', gender: 'boy', origin: 'Arabic', meaning: 'Father of nations', popular: false },
-  { name: 'Sebastian', gender: 'boy', origin: 'Greek', meaning: 'Venerable, revered', popular: true },
-  { name: 'Kwame', gender: 'boy', origin: 'Akan', meaning: 'Born on Saturday', popular: false },
-  { name: 'Leo', gender: 'boy', origin: 'Latin', meaning: 'Lion — brave and strong', popular: true },
-  { name: 'Yusuf', gender: 'boy', origin: 'Arabic', meaning: 'God increases', popular: false },
-  { name: 'Arlo', gender: 'boy', origin: 'English', meaning: 'Fortified hill', popular: true },
-  { name: 'Raphael', gender: 'boy', origin: 'Hebrew', meaning: 'God has healed', popular: false },
-  { name: 'Ethan', gender: 'boy', origin: 'Hebrew', meaning: 'Strong and firm', popular: true },
-  { name: 'Emmanuel', gender: 'boy', origin: 'Hebrew', meaning: 'God is with us', popular: false },
-  { name: 'Tobias', gender: 'boy', origin: 'Hebrew', meaning: 'God is good', popular: false },
-  { name: 'River', gender: 'neutral', origin: 'English', meaning: 'Flowing water — calm and free', popular: false },
-  { name: 'Phoenix', gender: 'neutral', origin: 'Greek', meaning: 'Rising from the ashes', popular: true },
-  { name: 'Sage', gender: 'neutral', origin: 'Latin', meaning: 'Wise and knowing', popular: false },
-  { name: 'Eden', gender: 'neutral', origin: 'Hebrew', meaning: 'Place of delight', popular: false },
-  { name: 'Remi', gender: 'neutral', origin: 'French / Yoruba', meaning: 'Oarsman / love me', popular: false },
-  { name: 'Rowan', gender: 'neutral', origin: 'Gaelic', meaning: 'Little red one', popular: true },
-  { name: 'Indigo', gender: 'neutral', origin: 'Greek', meaning: 'Deep blue — intuitive', popular: false },
-  { name: 'Cleo', gender: 'neutral', origin: 'Greek', meaning: 'Pride and glory', popular: false },
-  { name: 'Ezra', gender: 'neutral', origin: 'Hebrew', meaning: 'Help', popular: true },
-  { name: 'Asa', gender: 'neutral', origin: 'Hebrew', meaning: 'Healer', popular: false },
+  { name: 'Ethan', gender: 'boy', origin: 'Hebrew', meaning: 'Strong, firm', popular: true },
+  { name: 'Felix', gender: 'boy', origin: 'Latin', meaning: 'Happy, fortunate', popular: false },
+  { name: 'George', gender: 'boy', origin: 'Greek', meaning: 'Farmer, earth worker', popular: true },
+  { name: 'Hassan', gender: 'boy', origin: 'Arabic', meaning: 'Handsome, good', popular: true },
+  { name: 'Ibrahim', gender: 'boy', origin: 'Arabic', meaning: 'Father of nations', popular: true },
+  { name: 'Isaac', gender: 'boy', origin: 'Hebrew', meaning: 'He will laugh', popular: false },
+  { name: 'James', gender: 'boy', origin: 'English', meaning: 'Supplanter, strong', popular: true },
+  { name: 'Kai', gender: 'boy', origin: 'Hawaiian', meaning: 'Sea, ocean', popular: true },
+  { name: 'Liam', gender: 'boy', origin: 'Irish', meaning: 'Strong-willed warrior', popular: true },
+  { name: 'Leo', gender: 'boy', origin: 'Latin', meaning: 'Lion, brave', popular: true },
+  { name: 'Lucas', gender: 'boy', origin: 'Latin', meaning: 'Light, illumination', popular: true },
+  { name: 'Muhammad', gender: 'boy', origin: 'Arabic', meaning: 'Praised, praiseworthy', popular: true },
+  { name: 'Noah', gender: 'boy', origin: 'Hebrew', meaning: 'Rest, comfort', popular: true },
+  { name: 'Oliver', gender: 'boy', origin: 'Latin', meaning: 'Olive tree, peace', popular: true },
+  { name: 'Omar', gender: 'boy', origin: 'Arabic', meaning: 'Flourishing, long-lived', popular: true },
+  { name: 'Oscar', gender: 'boy', origin: 'Norse', meaning: 'God spear, divine strength', popular: false },
+  { name: 'Ryan', gender: 'boy', origin: 'Irish', meaning: 'Little king', popular: true },
+  { name: 'Samuel', gender: 'boy', origin: 'Hebrew', meaning: 'God has heard', popular: true },
+  { name: 'Sebastian', gender: 'boy', origin: 'Greek', meaning: 'Venerable, revered', popular: false },
+  { name: 'Theodore', gender: 'boy', origin: 'Greek', meaning: 'Gift of God', popular: true },
+  { name: 'Thomas', gender: 'boy', origin: 'Aramaic', meaning: 'Twin', popular: true },
+  { name: 'William', gender: 'boy', origin: 'English', meaning: 'Strong-willed warrior', popular: true },
+  { name: 'Yusuf', gender: 'boy', origin: 'Arabic', meaning: 'God increases', popular: true },
+  { name: 'Zain', gender: 'boy', origin: 'Arabic', meaning: 'Beauty, grace', popular: true },
+  { name: 'Ariel', gender: 'neutral', origin: 'Hebrew', meaning: 'Lion of God', popular: false },
+  { name: 'Avery', gender: 'neutral', origin: 'English', meaning: 'Ruler of elves', popular: true },
+  { name: 'Casey', gender: 'neutral', origin: 'Irish', meaning: 'Brave in battle', popular: false },
+  { name: 'Jordan', gender: 'neutral', origin: 'Hebrew', meaning: 'Flowing down, river', popular: true },
+  { name: 'Morgan', gender: 'neutral', origin: 'Welsh', meaning: 'Sea circle, bright', popular: false },
+  { name: 'River', gender: 'neutral', origin: 'English', meaning: 'Flowing water, peaceful', popular: true },
+  { name: 'Robin', gender: 'neutral', origin: 'English', meaning: 'Bright fame', popular: false },
+  { name: 'Sage', gender: 'neutral', origin: 'English', meaning: 'Wise, herb', popular: true },
+  { name: 'Sky', gender: 'neutral', origin: 'English', meaning: 'The sky, limitless', popular: false },
+  { name: 'Taylor', gender: 'neutral', origin: 'English', meaning: 'Tailor, one who cuts', popular: false },
 ];
 
-const ORIGINS = ['All', 'African', 'Arabic', 'English', 'Greek', 'Hebrew', 'Latin', 'Igbo', 'Akan', 'Norse', 'Other'];
-
+const ORIGINS = ['All', 'Arabic', 'English', 'Hebrew', 'Latin', 'Greek', 'African', 'French', 'Irish'];
 export default function BabyNamesScreen({ onBack }) {
+  const [searchText, setSearchText] = useState('');
   const [genderFilter, setGenderFilter] = useState('all');
   const [originFilter, setOriginFilter] = useState('All');
-  const [searchText, setSearchText] = useState('');
   const [favourites, setFavourites] = useState([]);
-  const [selectedName, setSelectedName] = useState(null);
   const [showFavourites, setShowFavourites] = useState(false);
-
-  const filtered = useMemo(() => {
-    return BABY_NAMES.filter(n => {
-      const matchGender = genderFilter === 'all' || n.gender === genderFilter;
-      const matchOrigin = originFilter === 'All' ||
-        n.origin.toLowerCase().includes(originFilter.toLowerCase());
-      const matchSearch = n.name.toLowerCase().includes(searchText.toLowerCase()) ||
-        n.meaning.toLowerCase().includes(searchText.toLowerCase());
-      return matchGender && matchOrigin && matchSearch;
-    });
-  }, [genderFilter, originFilter, searchText]);
+  const [selectedName, setSelectedName] = useState(null);
 
   const toggleFavourite = (name) => {
     setFavourites(prev =>
-      prev.includes(name) ? prev.filter(f => f !== name) : [...prev, name]
+      prev.includes(name)
+        ? prev.filter(n => n !== name)
+        : [...prev, name]
     );
   };
 
-  const isFavourite = (name) => favourites.includes(name);
-
-  const genderColor = (g) => {
-    if (g === 'girl') return '#E91E8C';
-    if (g === 'boy') return '#2196F3';
-    return '#9C27B0';
-  };
-
-  const genderEmoji = (g) => {
-    if (g === 'girl') return '🌸';
-    if (g === 'boy') return '💙';
-    return '✨';
-  };
+  const filteredNames = BABY_NAMES.filter(n => {
+    const matchesSearch = n.name.toLowerCase().includes(searchText.toLowerCase()) ||
+      n.meaning.toLowerCase().includes(searchText.toLowerCase());
+    const matchesGender = genderFilter === 'all' || n.gender === genderFilter;
+    const matchesOrigin = originFilter === 'All' || n.origin === originFilter;
+    const matchesFavourites = !showFavourites || favourites.includes(n.name);
+    return matchesSearch && matchesGender && matchesOrigin && matchesFavourites;
+  });
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#FAF0F5" />
 
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={onBack} style={styles.backBtn}>
-          <Text style={styles.backArrow}>←</Text>
+          <Text style={styles.backText}>← Back</Text>
         </TouchableOpacity>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.headerTitle}>Baby Names</Text>
-          <Text style={styles.headerSub}>Find the perfect name 👶</Text>
-        </View>
-        <TouchableOpacity style={styles.favBtn} onPress={() => setShowFavourites(true)}>
-          <Text style={styles.favBtnText}>💜 {favourites.length}</Text>
+        <Text style={styles.headerTitle}>Baby Names</Text>
+        <TouchableOpacity
+          style={styles.favBtn}
+          onPress={() => setShowFavourites(!showFavourites)}
+        >
+          <Text style={styles.favBtnText}>{showFavourites ? '💜' : '🤍'} {favourites.length}</Text>
         </TouchableOpacity>
       </View>
-
-      {/* Search */}
-      <View style={styles.searchBox}>
-        <Text style={styles.searchIcon}>🔍</Text>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search names or meanings..."
-          placeholderTextColor={COLORS.textLight}
-          value={searchText}
-          onChangeText={setSearchText}
-        />
-        {searchText.length > 0 && (
-          <TouchableOpacity onPress={() => setSearchText('')}>
-            <Text style={styles.clearBtn}>✕</Text>
-          </TouchableOpacity>
-        )}
-      </View>
-
-      {/* Gender Filter */}
-      <View style={styles.genderRow}>
-        {[
-          { id: 'all', label: '👶 All', color: '#7B6B9E' },
-          { id: 'girl', label: '🌸 Girl', color: '#E91E8C' },
-          { id: 'boy', label: '💙 Boy', color: '#2196F3' },
-          { id: 'neutral', label: '✨ Neutral', color: '#9C27B0' },
-        ].map(g => (
-          <TouchableOpacity
-            key={g.id}
-            style={[styles.genderBtn, genderFilter === g.id && { backgroundColor: g.color }]}
-            onPress={() => setGenderFilter(g.id)}
-          >
-            <Text style={[styles.genderLabel, genderFilter === g.id && { color: '#fff' }]}>
-              {g.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      {/* Origin Filter */}
-      <ScrollView
-        horizontal showsHorizontalScrollIndicator={false}
-        style={styles.originScroll}
-        contentContainerStyle={styles.originContent}
-      >
-        {ORIGINS.map(o => (
-          <TouchableOpacity
-            key={o}
-            style={[styles.originBtn, originFilter === o && styles.originBtnActive]}
-            onPress={() => setOriginFilter(o)}
-          >
-            <Text style={[styles.originLabel, originFilter === o && styles.originLabelActive]}>
-              {o}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-
-      <Text style={styles.resultsCount}>{filtered.length} names found</Text>
-
-      {/* Names List */}
-      <ScrollView style={styles.list} showsVerticalScrollIndicator={false}>
-        {filtered.map((item, i) => (
-          <TouchableOpacity
-            key={i}
-            style={styles.nameCard}
-            onPress={() => setSelectedName(item)}
-          >
-            <View style={[styles.genderDot, { backgroundColor: genderColor(item.gender) }]}>
-              <Text style={styles.genderDotEmoji}>{genderEmoji(item.gender)}</Text>
-            </View>
-            <View style={styles.nameInfo}>
-              <View style={styles.nameRow}>
-                <Text style={styles.nameTxt}>{item.name}</Text>
-                {item.popular && (
-                  <View style={styles.popularBadge}>
-                    <Text style={styles.popularText}>⭐ Popular</Text>
-                  </View>
-                )}
-              </View>
-              <Text style={styles.nameOrigin}>{item.origin}</Text>
-              <Text style={styles.nameMeaning} numberOfLines={1}>{item.meaning}</Text>
-            </View>
-            <TouchableOpacity
-              style={styles.heartBtn}
-              onPress={() => toggleFavourite(item.name)}
-            >
-              <Text style={styles.heartIcon}>
-                {isFavourite(item.name) ? '💜' : '🤍'}
-              </Text>
-            </TouchableOpacity>
-          </TouchableOpacity>
-        ))}
-        <View style={{ height: 60 }} />
-      </ScrollView>
 
       {/* Name Detail Modal */}
-      <Modal visible={!!selectedName} animationType="slide" transparent>
+      {selectedName && (
         <View style={styles.modalOverlay}>
-          <View style={styles.modalSheet}>
-            <View style={styles.modalHandle} />
-            {selectedName && (
-              <>
-                <Text style={styles.modalGenderEmoji}>{genderEmoji(selectedName.gender)}</Text>
-                <Text style={styles.modalName}>{selectedName.name}</Text>
-                <View style={[styles.modalGenderBadge, { backgroundColor: genderColor(selectedName.gender) }]}>
-                  <Text style={styles.modalGenderLabel}>
-                    {selectedName.gender.charAt(0).toUpperCase() + selectedName.gender.slice(1)} Name
-                  </Text>
+          <View style={styles.modal}>
+            <Text style={styles.modalName}>{selectedName.name}</Text>
+            <View style={[styles.modalGenderBadge, {
+              backgroundColor: selectedName.gender === 'girl' ? '#FFE8F0' :
+                selectedName.gender === 'boy' ? '#EAF4FF' : '#F0EAFF'
+            }]}>
+              <Text style={styles.modalGenderText}>
+                {selectedName.gender === 'girl' ? '👧 Girl' :
+                  selectedName.gender === 'boy' ? '👦 Boy' : '⭐ Neutral'}
+              </Text>
+            </View>
+            <View style={styles.modalRow}>
+              <Text style={styles.modalLabel}>🌍 Origin</Text>
+              <Text style={styles.modalValue}>{selectedName.origin}</Text>
+            </View>
+            <View style={styles.modalRow}>
+              <Text style={styles.modalLabel}>💡 Meaning</Text>
+              <Text style={styles.modalValue}>{selectedName.meaning}</Text>
+            </View>
+            {selectedName.popular && (
+              <View style={styles.popularBadge}>
+                <Text style={styles.popularBadgeText}>⭐ Popular Choice</Text>
+              </View>
+            )}
+            <View style={styles.modalBtns}>
+              <TouchableOpacity
+                style={[styles.modalFavBtn, favourites.includes(selectedName.name) && styles.modalFavBtnActive]}
+                onPress={() => toggleFavourite(selectedName.name)}
+              >
+                <Text style={styles.modalFavBtnText}>
+                  {favourites.includes(selectedName.name) ? '💜 Saved' : '🤍 Save'}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.modalCloseBtn}
+                onPress={() => setSelectedName(null)}
+              >
+                <Text style={styles.modalCloseBtnText}>Close</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      )}
+
+      <ScrollView showsVerticalScrollIndicator={false}>
+
+        {/* Search */}
+        <View style={styles.searchBox}>
+          <Text style={styles.searchIcon}>🔍</Text>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search names or meanings..."
+            placeholderTextColor={COLORS.textLight}
+            value={searchText}
+            onChangeText={setSearchText}
+          />
+          {searchText.length > 0 && (
+            <TouchableOpacity onPress={() => setSearchText('')}>
+              <Text style={styles.clearText}>✕</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {/* Gender Filter */}
+        <View style={styles.genderRow}>
+          {[
+            { id: 'all', label: '⭐ All', color: '#9B59B6' },
+            { id: 'girl', label: '👧 Girls', color: '#C9748F' },
+            { id: 'boy', label: '👦 Boys', color: '#3498DB' },
+            { id: 'neutral', label: '🌈 Neutral', color: '#27AE60' },
+          ].map(g => (
+            <TouchableOpacity
+              key={g.id}
+              style={[styles.genderBtn, genderFilter === g.id && { backgroundColor: g.color, borderColor: g.color }]}
+              onPress={() => setGenderFilter(g.id)}
+            >
+              <Text style={[styles.genderBtnText, genderFilter === g.id && styles.genderBtnTextActive]}>
+                {g.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* Origin Filter */}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.originScroll}>
+          {ORIGINS.map(origin => (
+            <TouchableOpacity
+              key={origin}
+              style={[styles.originBtn, originFilter === origin && styles.originBtnActive]}
+              onPress={() => setOriginFilter(origin)}
+            >
+              <Text style={[styles.originBtnText, originFilter === origin && styles.originBtnTextActive]}>
+                {origin}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+
+        {/* Results Count */}
+        <View style={styles.resultsRow}>
+          <Text style={styles.resultsCount}>
+            {showFavourites ? '💜 Saved Names' : `${filteredNames.length} names found`}
+          </Text>
+        </View>
+
+        {/* Names Grid */}
+        {filteredNames.length === 0 ? (
+          <View style={styles.emptyBox}>
+            <Text style={styles.emptyEmoji}>🔍</Text>
+            <Text style={styles.emptyText}>No names found{'\n'}Try a different search!</Text>
+          </View>
+        ) : (
+          <View style={styles.namesGrid}>
+            {filteredNames.map((item, i) => (
+              <TouchableOpacity
+                key={i}
+                style={[styles.nameCard, {
+                  borderTopColor: item.gender === 'girl' ? '#C9748F' :
+                    item.gender === 'boy' ? '#3498DB' : '#9B59B6'
+                }]}
+                onPress={() => setSelectedName(item)}
+              >
+                <View style={styles.nameCardTop}>
+                  <Text style={styles.nameText}>{item.name}</Text>
+                  <TouchableOpacity onPress={() => toggleFavourite(item.name)}>
+                    <Text style={styles.heartIcon}>
+                      {favourites.includes(item.name) ? '💜' : '🤍'}
+                    </Text>
+                  </TouchableOpacity>
                 </View>
-                <View style={styles.modalDetailRow}>
-                  <Text style={styles.modalDetailLabel}>🌍 Origin</Text>
-                  <Text style={styles.modalDetailValue}>{selectedName.origin}</Text>
-                </View>
-                <View style={styles.modalDetailRow}>
-                  <Text style={styles.modalDetailLabel}>💡 Meaning</Text>
-                  <Text style={styles.modalDetailValue}>{selectedName.meaning}</Text>
-                </View>
-                {selectedName.popular && (
-                  <View style={styles.modalPopular}>
-                    <Text style={styles.modalPopularText}>⭐ Popular name in our community</Text>
+                <Text style={styles.nameOrigin}>{item.origin}</Text>
+                <Text style={styles.nameMeaning} numberOfLines={2}>{item.meaning}</Text>
+                {item.popular && (
+                  <View style={styles.popularTag}>
+                    <Text style={styles.popularTagText}>⭐ Popular</Text>
                   </View>
                 )}
-                <TouchableOpacity
-                  style={[
-                    styles.modalFavBtn,
-                    isFavourite(selectedName.name)
-                      ? { backgroundColor: COLORS.primary }
-                      : { borderWidth: 2, borderColor: COLORS.primary },
-                  ]}
-                  onPress={() => toggleFavourite(selectedName.name)}
-                >
-                  <Text style={[
-                    styles.modalFavBtnText,
-                    !isFavourite(selectedName.name) && { color: COLORS.primary },
-                  ]}>
-                    {isFavourite(selectedName.name) ? '💜 Saved to Favourites' : '🤍 Add to Favourites'}
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.closeBtn} onPress={() => setSelectedName(null)}>
-                  <Text style={styles.closeBtnText}>Close</Text>
-                </TouchableOpacity>
-              </>
-            )}
+              </TouchableOpacity>
+            ))}
           </View>
-        </View>
-      </Modal>
+        )}
 
-      {/* Favourites Modal */}
-      <Modal visible={showFavourites} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalSheet}>
-            <View style={styles.modalHandle} />
-            <Text style={styles.modalName}>💜 Your Favourites</Text>
-            {favourites.length === 0 ? (
-              <Text style={styles.emptyFav}>
-                You have not saved any names yet. Tap 🤍 on a name to save it here.
-              </Text>
-            ) : (
-              <ScrollView style={{ width: '100%', maxHeight: 300 }}>
-                {favourites.map((fav, i) => {
-                  const nameData = BABY_NAMES.find(n => n.name === fav);
-                  return (
-                    <View key={i} style={styles.favItem}>
-                      <Text style={styles.favItemEmoji}>
-                        {nameData ? genderEmoji(nameData.gender) : '👶'}
-                      </Text>
-                      <View style={{ flex: 1 }}>
-                        <Text style={styles.favItemName}>{fav}</Text>
-                        {nameData && (
-                          <Text style={styles.favItemMeaning}>{nameData.meaning}</Text>
-                        )}
-                      </View>
-                      <TouchableOpacity onPress={() => toggleFavourite(fav)}>
-                        <Text style={{ fontSize: 20 }}>💜</Text>
-                      </TouchableOpacity>
-                    </View>
-                  );
-                })}
-              </ScrollView>
-            )}
-            <TouchableOpacity style={styles.closeBtn} onPress={() => setShowFavourites(false)}>
-              <Text style={styles.closeBtnText}>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+        <View style={{ height: 100 }} />
+      </ScrollView>
     </SafeAreaView>
   );
 }
-
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: COLORS.background },
+  container: { flex: 1, backgroundColor: '#FAF0F5' },
   header: {
-    flexDirection: 'row', alignItems: 'center',
-    paddingHorizontal: 20, paddingVertical: 16,
-    backgroundColor: COLORS.white,
-    borderBottomWidth: 1, borderBottomColor: COLORS.border, gap: 12,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: 20, paddingTop: 16, paddingBottom: 12,
   },
-  backBtn: {
-    width: 40, height: 40, borderRadius: 20,
-    backgroundColor: COLORS.background,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  backArrow: { fontSize: 22, color: COLORS.primary },
-  headerTitle: { fontSize: 20, fontWeight: '800', color: COLORS.text },
-  headerSub: { fontSize: 13, color: COLORS.textLight, marginTop: 2 },
+  backBtn: { padding: 8 },
+  backText: { fontSize: 16, color: '#C9748F', fontWeight: '700' },
+  headerTitle: { fontSize: 18, fontWeight: '800', color: '#2D1B2E' },
   favBtn: {
-    backgroundColor: COLORS.background, borderRadius: 50,
-    paddingHorizontal: 14, paddingVertical: 8,
-    borderWidth: 1, borderColor: COLORS.border,
+    backgroundColor: '#F9EEF3', borderRadius: 20,
+    paddingHorizontal: 12, paddingVertical: 6,
   },
-  favBtnText: { fontSize: 14, fontWeight: '700', color: COLORS.primary },
+  favBtnText: { fontSize: 14, fontWeight: '700', color: '#C9748F' },
+  modalOverlay: {
+    position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 100,
+    alignItems: 'center', justifyContent: 'center', padding: 20,
+  },
+  modal: {
+    backgroundColor: '#fff', borderRadius: 24,
+    padding: 24, width: '100%', alignItems: 'center',
+  },
+  modalName: { fontSize: 36, fontWeight: '800', color: '#2D1B2E', marginBottom: 12 },
+  modalGenderBadge: { borderRadius: 20, paddingHorizontal: 16, paddingVertical: 6, marginBottom: 16 },
+  modalGenderText: { fontSize: 14, fontWeight: '700', color: '#2D1B2E' },
+  modalRow: {
+    width: '100%', flexDirection: 'row', justifyContent: 'space-between',
+    paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#FAF0F5',
+  },
+  modalLabel: { fontSize: 14, color: '#9B8FA0', fontWeight: '600' },
+  modalValue: { fontSize: 14, color: '#2D1B2E', fontWeight: '700', flex: 1, textAlign: 'right' },
+  popularBadge: {
+    backgroundColor: '#FFF3CD', borderRadius: 20,
+    paddingHorizontal: 14, paddingVertical: 6, marginTop: 12,
+  },
+  popularBadgeText: { fontSize: 13, fontWeight: '700', color: '#856404' },
+  modalBtns: { flexDirection: 'row', gap: 10, marginTop: 20, width: '100%' },
+  modalFavBtn: {
+    flex: 1, borderWidth: 2, borderColor: '#C9748F',
+    borderRadius: 50, paddingVertical: 12, alignItems: 'center',
+  },
+  modalFavBtnActive: { backgroundColor: '#C9748F' },
+  modalFavBtnText: { fontSize: 15, fontWeight: '700', color: '#C9748F' },
+  modalCloseBtn: {
+    flex: 1, backgroundColor: '#FAF0F5',
+    borderRadius: 50, paddingVertical: 12, alignItems: 'center',
+  },
+  modalCloseBtnText: { fontSize: 15, fontWeight: '700', color: '#9B8FA0' },
   searchBox: {
     flexDirection: 'row', alignItems: 'center',
-    backgroundColor: COLORS.white, margin: 16, borderRadius: 16,
+    backgroundColor: '#fff', borderRadius: 16,
+    marginHorizontal: 20, marginBottom: 14,
     paddingHorizontal: 14, paddingVertical: 12,
-    borderWidth: 1, borderColor: COLORS.border, gap: 10,
+    shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 6, elevation: 2,
   },
-  searchIcon: { fontSize: 18 },
-  searchInput: { flex: 1, fontSize: 15, color: COLORS.text },
-  clearBtn: { fontSize: 16, color: COLORS.textLight, paddingHorizontal: 4 },
-  genderRow: { flexDirection: 'row', marginHorizontal: 16, gap: 8, marginBottom: 10 },
+  searchIcon: { fontSize: 16, marginRight: 8 },
+  searchInput: { flex: 1, fontSize: 15, color: '#2D1B2E' },
+  clearText: { fontSize: 16, color: '#9B8FA0', fontWeight: '700' },
+  genderRow: {
+    flexDirection: 'row', marginHorizontal: 20,
+    marginBottom: 12, gap: 8,
+  },
   genderBtn: {
-    flex: 1, paddingVertical: 9, borderRadius: 12,
-    alignItems: 'center', backgroundColor: COLORS.background,
+    flex: 1, paddingVertical: 8, borderRadius: 20,
+    borderWidth: 1.5, borderColor: '#EDE0E8',
+    alignItems: 'center', backgroundColor: '#fff',
   },
-  genderLabel: { fontSize: 12, fontWeight: '700', color: COLORS.text },
-  originScroll: { maxHeight: 48 },
-  originContent: { paddingHorizontal: 16, gap: 8, paddingVertical: 4 },
+  genderBtnText: { fontSize: 11, fontWeight: '700', color: '#9B8FA0' },
+  genderBtnTextActive: { color: '#fff' },
+  originScroll: { paddingLeft: 20, marginBottom: 14 },
   originBtn: {
+    backgroundColor: '#fff', borderRadius: 20,
     paddingHorizontal: 14, paddingVertical: 8,
-    borderRadius: 50, backgroundColor: COLORS.background,
+    marginRight: 8, borderWidth: 1.5, borderColor: '#EDE0E8',
   },
-  originBtnActive: { backgroundColor: COLORS.primary },
-  originLabel: { fontSize: 13, fontWeight: '600', color: COLORS.text },
-  originLabelActive: { color: '#fff' },
-  resultsCount: {
-    fontSize: 13, color: COLORS.textLight,
-    marginHorizontal: 20, marginTop: 10, marginBottom: 6,
+  originBtnActive: { backgroundColor: '#C9748F', borderColor: '#C9748F' },
+  originBtnText: { fontSize: 13, fontWeight: '600', color: '#9B8FA0' },
+  originBtnTextActive: { color: '#fff' },
+  resultsRow: { paddingHorizontal: 20, marginBottom: 12 },
+  resultsCount: { fontSize: 14, fontWeight: '700', color: '#9B8FA0' },
+  emptyBox: { alignItems: 'center', paddingVertical: 40 },
+  emptyEmoji: { fontSize: 48, marginBottom: 12 },
+  emptyText: { fontSize: 16, color: '#9B8FA0', textAlign: 'center', lineHeight: 24 },
+  namesGrid: {
+    flexDirection: 'row', flexWrap: 'wrap',
+    paddingHorizontal: 20, gap: 10,
   },
-  list: { flex: 1, paddingHorizontal: 16 },
   nameCard: {
-    flexDirection: 'row', alignItems: 'center',
-    backgroundColor: COLORS.white, borderRadius: 16,
-    padding: 14, marginBottom: 10,
-    borderWidth: 1, borderColor: COLORS.border, gap: 12,
+    width: '47%', backgroundColor: '#fff',
+    borderRadius: 16, padding: 14,
+    borderTopWidth: 3,
+    shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 6, elevation: 2,
   },
-  genderDot: {
-    width: 44, height: 44, borderRadius: 22,
-    alignItems: 'center', justifyContent: 'center',
+  nameCardTop: {
+    flexDirection: 'row', justifyContent: 'space-between',
+    alignItems: 'center', marginBottom: 4,
   },
-  genderDotEmoji: { fontSize: 20 },
-  nameInfo: { flex: 1 },
-  nameRow: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
-  nameTxt: { fontSize: 17, fontWeight: '800', color: COLORS.text },
-  popularBadge: {
-    backgroundColor: '#FFF8E1', borderRadius: 50,
-    paddingHorizontal: 8, paddingVertical: 3,
+  nameText: { fontSize: 18, fontWeight: '800', color: '#2D1B2E' },
+  heartIcon: { fontSize: 18 },
+  nameOrigin: { fontSize: 11, color: '#9B59B6', fontWeight: '700', marginBottom: 4 },
+  nameMeaning: { fontSize: 12, color: '#9B8FA0', lineHeight: 18 },
+  popularTag: {
+    backgroundColor: '#FFF3CD', borderRadius: 10,
+    paddingHorizontal: 8, paddingVertical: 3, marginTop: 6,
+    alignSelf: 'flex-start',
   },
-  popularText: { fontSize: 11, fontWeight: '600', color: '#F59E0B' },
-  nameOrigin: { fontSize: 12, color: COLORS.textLight, marginTop: 2 },
-  nameMeaning: { fontSize: 13, color: COLORS.text, marginTop: 2 },
-  heartBtn: { padding: 4 },
-  heartIcon: { fontSize: 22 },
-  modalOverlay: {
-    flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end',
-  },
-  modalSheet: {
-    backgroundColor: COLORS.white, borderTopLeftRadius: 28,
-    borderTopRightRadius: 28, padding: 28, alignItems: 'center',
-  },
-  modalHandle: {
-    width: 40, height: 4, borderRadius: 2,
-    backgroundColor: COLORS.border, marginBottom: 20,
-  },
-  modalGenderEmoji: { fontSize: 48, marginBottom: 8 },
-  modalName: { fontSize: 26, fontWeight: '800', color: COLORS.text, marginBottom: 10 },
-  modalGenderBadge: {
-    borderRadius: 50, paddingHorizontal: 20, paddingVertical: 8, marginBottom: 20,
-  },
-  modalGenderLabel: { color: '#fff', fontWeight: '700', fontSize: 14 },
-  modalDetailRow: {
-    width: '100%', flexDirection: 'row', justifyContent: 'space-between',
-    paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: COLORS.border,
-  },
-  modalDetailLabel: { fontSize: 14, color: COLORS.textLight, fontWeight: '600' },
-  modalDetailValue: { fontSize: 14, color: COLORS.text, fontWeight: '600', flex: 1, textAlign: 'right' },
-  modalPopular: {
-    backgroundColor: '#FFF8E1', borderRadius: 12, padding: 12,
-    marginTop: 14, width: '100%',
-  },
-  modalPopularText: { fontSize: 13, color: '#F59E0B', fontWeight: '600', textAlign: 'center' },
-  modalFavBtn: {
-    width: '100%', paddingVertical: 15, borderRadius: 50,
-    alignItems: 'center', marginTop: 20, backgroundColor: COLORS.primary,
-  },
-  modalFavBtnText: { color: '#fff', fontWeight: '700', fontSize: 16 },
-  closeBtn: {
-    borderWidth: 2, borderColor: COLORS.border, borderRadius: 50,
-    paddingVertical: 13, paddingHorizontal: 48, marginTop: 12,
-  },
-  closeBtnText: { color: COLORS.textLight, fontWeight: '700', fontSize: 15 },
-  emptyFav: {
-    fontSize: 14, color: COLORS.textLight, textAlign: 'center',
-    lineHeight: 22, marginVertical: 20,
-  },
-  favItem: {
-    flexDirection: 'row', alignItems: 'center',
-    paddingVertical: 12, borderBottomWidth: 1,
-    borderBottomColor: COLORS.border, gap: 12, width: '100%',
-  },
-  favItemEmoji: { fontSize: 24 },
-  favItemName: { fontSize: 16, fontWeight: '700', color: COLORS.text },
-  favItemMeaning: { fontSize: 13, color: COLORS.textLight, marginTop: 2 },
+  popularTagText: { fontSize: 10, fontWeight: '700', color: '#856404' },
 });
