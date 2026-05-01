@@ -70,23 +70,9 @@ export default function App() {
   }
 
   if (appScreen === 'onboarding') {
-    return <OnboardingScreen onFinish={() => setAppScreen('disclaimer')} />;
+    return <OnboardingScreen onFinish={() => setAppScreen('signup')} />;
   }
 
-  if (appScreen === 'disclaimer') {
-    return <DisclaimerScreen onAccept={() => setAppScreen('journey')} />;
-  }
-
-  if (appScreen === 'journey') {
-    return (
-      <JourneyScreen
-        onSelect={(journey) => {
-          setUserJourney(journey);
-          setAppScreen('signup');
-        }}
-      />
-    );
-  }
 
   if (appScreen === 'signup') {
     return (
