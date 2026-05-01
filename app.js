@@ -37,9 +37,9 @@ const COLORS = {
 
 const TABS = [
   { id: 'home', label: 'Home', emoji: '🏠' },
-  { id: 'cycle', label: 'Cycle', emoji: '🌸' },
-  { id: 'bella', label: 'Bella', emoji: '🤖' },
-  { id: 'community', label: 'Connect', emoji: '👥' },
+  { id: 'cycle', label: 'Tracker', emoji: '📅' },
+  { id: 'bella', label: 'AI Chat', emoji: '💬' },
+  { id: 'community', label: 'Learn', emoji: '📖' },
   { id: 'profile', label: 'Profile', emoji: '👤' },
 ];
 
