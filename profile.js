@@ -1,271 +1,111 @@
 import React, { useState } from 'react';
 import {
   View, Text, StyleSheet, ScrollView,
-  TouchableOpacity, SafeAreaView, StatusBar, Modal,
-  TextInput, Linking, Alert,
+  TouchableOpacity, SafeAreaView, StatusBar,
+  Alert, Switch,
 } from 'react-native';
 import COLORS from './colors';
 
-const LANGUAGES = [
-  { code: 'en', flag: '🇬🇧', label: 'English' },
-  { code: 'fr', flag: '🇫🇷', label: 'Français' },
-  { code: 'ar', flag: '🇸🇦', label: 'العربية' },
-  { code: 'es', flag: '🇪🇸', label: 'Español' },
-  { code: 'de', flag: '🇩🇪', label: 'Deutsch' },
-  { code: 'pt', flag: '🇵🇹', label: 'Português' },
+const MENU_ITEMS = [
+  { id: '1', emoji: '👤', label: 'Personal Information', color: '#C9748F' },
+  { id: '2', emoji: '🔔', label: 'Notifications', color: '#F59E0B' },
+  { id: '3', emoji: '🔒', label: 'Privacy & Security', color: '#3498DB' },
+  { id: '4', emoji: '💜', label: 'Subscription Plan', color: '#9B59B6' },
+  { id: '5', emoji: '🌍', label: 'Language', color: '#27AE60' },
+  { id: '6', emoji: '♿', label: 'Accessibility', color: '#E67E22' },
+  { id: '7', emoji: '❓', label: 'Help & Support', color: '#1ABC9C' },
+  { id: '8', emoji: '⭐', label: 'Rate Bellava', color: '#F1C40F' },
+  { id: '9', emoji: '📄', label: 'Privacy Policy', color: '#95A5A6' },
+  { id: '10', emoji: '📋', label: 'Terms of Service', color: '#95A5A6' },
 ];
 
-const JOURNEYS = [
-  { id: 'conceive', emoji: '🌱', label: 'Trying to Conceive', color: '#27AE60' },
-  { id: 'pregnant', emoji: '🤰', label: 'Pregnant', color: '#9B59B6' },
-  { id: 'surrogacy', emoji: '👶', label: 'Surrogacy Journey', color: '#E91E8C' },
-  { id: 'wellbeing', emoji: '💜', label: 'General Wellbeing', color: '#C9748F' },
+const STATS = [
+  { label: 'Days Tracked', value: '47', emoji: '📅' },
+  { label: 'Symptoms Logged', value: '23', emoji: '📝' },
+  { label: 'Streak', value: '12🔥', emoji: '🔥' },
 ];
 
-const NOTIFICATION_SETTINGS = [
-  { id: 'daily', label: 'Daily check-in reminder', emoji: '📅' },
-  { id: 'period', label: 'Period prediction alerts', emoji: '🌸' },
-  { id: 'ovulation', label: 'Ovulation window alerts', emoji: '✨' },
-  { id: 'community', label: 'Community replies', emoji: '💬' },
-  { id: 'appointments', label: 'Appointment reminders', emoji: '🏥' },
-  { id: 'bella', label: 'Bella health tips', emoji: '🤖' },
-  { id: 'marketing', label: 'News and updates', emoji: '📢' },
-];
+const LANGUAGES = ['English', 'French', 'Arabic', 'Spanish', 'German', 'Portuguese'];
+export default function ProfileScreen({ userName, userEmail, userPlan, onLogout }) {
+  const [notifications, setNotifications] = useState(true);
+  const [periodReminders, setPeriodReminders] = useState(true);
+  const [darkMode, setDarkMode] = useState(false);
+  const [showLanguage, setShowLanguage] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState('English');
 
-const AVATAR_COLORS = [
-  '#C9748F', '#9B59B6', '#27AE60', '#E91E8C',
-  '#F39C12', '#4A90C4', '#E74C3C', '#1ABC9C',
-];
-
-const PRIVACY_POLICY = `PRIVACY POLICY — BELLAVA
-Last updated: April 2025
-Operated by Reine Mande Ltd, London, United Kingdom
-
-1. INFORMATION WE COLLECT
-We collect information you provide when creating an account including your name, email address and health data you choose to log in the app.
-
-2. HOW WE USE YOUR DATA
-Your data is used to personalise your Bellava experience, provide AI health support through Bella, and improve our services. We never sell your personal data to third parties.
-
-3. DATA STORAGE
-Your data is stored securely using Supabase infrastructure with encryption at rest and in transit.
-
-4. YOUR RIGHTS
-Under UK GDPR you have the right to access, correct or delete your personal data at any time. Contact us at support@bellava.com to exercise your rights.
-
-5. HEALTH DATA
-Health data you enter is sensitive. We treat it with the highest level of care and it is never shared without your explicit consent.
-
-6. CONTACT
-Reine Mande Ltd
-Email: support@bellava.com
-London, United Kingdom`;
-
-const TERMS_OF_SERVICE = `TERMS OF SERVICE — BELLAVA
-Last updated: April 2025
-
-1. ACCEPTANCE
-By using Bellava you agree to these terms. If you do not agree, please do not use the app.
-
-2. MEDICAL DISCLAIMER
-Bellava is not a medical device and does not provide medical advice. Always consult a qualified healthcare professional for medical concerns.
-
-3. ELIGIBILITY
-You must be 18 or older to use Bellava.
-
-4. SUBSCRIPTIONS
-Bellava offers Free, Plus and Pro subscription tiers. Subscriptions are billed through the App Store or Google Play. Cancel any time in your device settings.
-
-5. INTELLECTUAL PROPERTY
-All content in Bellava is owned by Reine Mande Ltd. You may not copy or redistribute any content without permission.
-
-6. LIMITATION OF LIABILITY
-Reine Mande Ltd is not liable for any health decisions made based on information provided in the app.
-
-7. CONTACT
-support@bellava.com`;
-
-const MEDICAL_DISCLAIMER = `MEDICAL DISCLAIMER — BELLAVA
-
-Bellava and Bella AI provide general health information only.
-
-IMPORTANT:
-• Nothing in this app constitutes medical advice, diagnosis or treatment
-• Always seek the advice of a qualified healthcare provider for any medical condition
-• Never disregard professional advice because of something you read in this app
-• In a medical emergency, call 999 immediately
-
-MENTAL HEALTH SUPPORT:
-• Samaritans: 116 123 (free, 24/7)
-• Crisis Text Line: Text SHOUT to 85258
-• NHS urgent mental health: 111
-
-Bellava is operated by Reine Mande Ltd, London, United Kingdom.`;
-
-export default function ProfileScreen({
-  onBack, userName, userEmail, userPlan,
-  userJourney, onLogout, onNavigate,
-}) {
-  const [language, setLanguage] = useState('en');
-  const [journey, setJourney] = useState(userJourney || 'wellbeing');
-  const [avatarColor, setAvatarColor] = useState(COLORS.primary);
-  const [tapCount, setTapCount] = useState(0);
-  const [notifications, setNotifications] = useState({
-    daily: true, period: true, ovulation: true,
-    community: true, appointments: true, bella: true, marketing: false,
-  });
-
-  const [showLanguageModal, setShowLanguageModal] = useState(false);
-  const [showJourneyModal, setShowJourneyModal] = useState(false);
-  const [showAvatarModal, setShowAvatarModal] = useState(false);
-  const [showLogoutModal, setShowLogoutModal] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [showEditProfile, setShowEditProfile] = useState(false);
-  const [showChangePassword, setShowChangePassword] = useState(false);
-  const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
-  const [showTerms, setShowTerms] = useState(false);
-  const [showMedicalDisclaimer, setShowMedicalDisclaimer] = useState(false);
-  const [showDownloadData, setShowDownloadData] = useState(false);
-
-  const [editName, setEditName] = useState(userName || '');
-  const [editEmail, setEditEmail] = useState(userEmail || '');
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmNewPassword, setConfirmNewPassword] = useState('');
-
-  const firstName = userName ? userName.split(' ')[0] : 'Beautiful';
-  const currentLanguage = LANGUAGES.find(l => l.code === language);
-  const currentJourney = JOURNEYS.find(j => j.id === journey);
-
-  const toggleNotification = (id) => {
-    setNotifications(prev => ({ ...prev, [id]: !prev[id] }));
-  };
-
-  const planColor = () => {
-    if (userPlan === 'PRO') return '#F59E0B';
-    if (userPlan === 'PLUS') return COLORS.primary;
-    return COLORS.textLight;
-  };
-
-  const planEmoji = () => {
-    if (userPlan === 'PRO') return '👑';
-    if (userPlan === 'PLUS') return '⭐';
-    return '🆓';
-  };
-
-  const handleSecretTap = () => {
-    setTapCount(prev => {
-      const next = prev + 1;
-      if (next >= 5) {
-        onNavigate('admin');
-        return 0;
-      }
-      if (next === 3) {
-        Alert.alert('💜', 'Almost there...');
-      }
-      return next;
-    });
-  };
-
-  const handleContactSupport = () => {
-    Linking.openURL('mailto:support@bellava.com?subject=Bellava Support Request');
-  };
-
-  const handleReportBug = () => {
-    Linking.openURL('mailto:support@bellava.com?subject=Bug Report — Bellava App');
-  };
-
-  const handleRateBellava = () => {
-    Alert.alert(
-      '⭐ Rate Bellava',
-      'Bellava is not yet on the App Store. Once we launch, you will be able to rate us here! Thank you for your support. 💜',
-      [{ text: 'Got it!', style: 'default' }]
-    );
-  };
-
-  const handleSaveProfile = () => {
-    setShowEditProfile(false);
-    Alert.alert('✅ Profile Updated', 'Your profile has been saved successfully. 💜');
-  };
-
-  const handleChangePassword = () => {
-    if (!currentPassword || !newPassword || !confirmNewPassword) {
-      Alert.alert('⚠️ Missing fields', 'Please fill in all password fields.');
-      return;
+  const handleMenuItem = (item) => {
+    if (item.label === 'Language') {
+      setShowLanguage(!showLanguage);
+    } else if (item.label === 'Subscription Plan') {
+      Alert.alert('Your Plan 💜', `You are currently on the ${userPlan || 'FREE'} plan.\n\nUpgrade to PLUS for £4.99/month or PRO for £7.99/month.`, [
+        { text: 'Maybe Later' },
+        { text: 'Upgrade 💜', onPress: () => Alert.alert('Coming Soon!', 'In-app purchases coming soon! 💜') }
+      ]);
+    } else if (item.label === 'Rate Bellava') {
+      Alert.alert('Rate Bellava ⭐', 'Thank you for using Bellava! Please rate us on the App Store.', [
+        { text: 'Not Now' },
+        { text: 'Rate Now ⭐' }
+      ]);
+    } else if (item.label === 'Help & Support') {
+      Alert.alert('Help & Support 💜', 'Email us at support@bellava.com\n\nWe respond within 24 hours!', [
+        { text: 'OK' }
+      ]);
+    } else if (item.label === 'Privacy Policy') {
+      Alert.alert('Privacy Policy', 'Visit bellava.com/privacy for our full privacy policy.');
+    } else if (item.label === 'Terms of Service') {
+      Alert.alert('Terms of Service', 'Visit bellava.com/terms for our full terms of service.');
+    } else {
+      Alert.alert(item.label, 'Coming soon! 💜');
     }
-    if (newPassword !== confirmNewPassword) {
-      Alert.alert('⚠️ Passwords do not match', 'Your new passwords do not match.');
-      return;
-    }
-    if (newPassword.length < 8) {
-      Alert.alert('⚠️ Password too short', 'Your new password must be at least 8 characters.');
-      return;
-    }
-    setShowChangePassword(false);
-    setCurrentPassword('');
-    setNewPassword('');
-    setConfirmNewPassword('');
-    Alert.alert('✅ Password Changed', 'Your password has been updated. 💜');
   };
+
+  const initials = userName
+    ? userName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+    : 'B';
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#FAF0F5" />
+      <ScrollView showsVerticalScrollIndicator={false}>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-
-        {/* Profile Hero Card */}
-        <View style={styles.heroCard}>
-          <View style={styles.heroBg} />
-          <View style={styles.heroContent}>
-            <TouchableOpacity
-              style={styles.avatarWrap}
-              onPress={() => setShowAvatarModal(true)}
-            >
-              <View style={[styles.avatarCircle, { backgroundColor: avatarColor }]}>
-                <Text style={styles.avatarLetter}>
-                  {firstName.charAt(0).toUpperCase()}
-                </Text>
-              </View>
-              <View style={styles.editAvatarBadge}>
-                <Text style={styles.editAvatarIcon}>✏️</Text>
-              </View>
-            </TouchableOpacity>
-
-            <Text style={styles.profileName}>{firstName}</Text>
-            <Text style={styles.profileEmail}>{userEmail || 'No email set'}</Text>
-
-            <View style={[styles.planBadge, { backgroundColor: planColor() }]}>
-              <Text style={styles.planBadgeText}>
-                {planEmoji()} {userPlan} Plan
-              </Text>
-            </View>
-
-            {currentJourney && (
-              <View style={styles.journeyBadge}>
-                <Text style={styles.journeyBadgeEmoji}>{currentJourney.emoji}</Text>
-                <Text style={styles.journeyBadgeText}>{currentJourney.label}</Text>
-              </View>
-            )}
-
-            {userPlan === 'FREE' && (
-              <TouchableOpacity
-                style={styles.upgradeBtn}
-                onPress={() => onNavigate('subscription')}
-              >
-                <Text style={styles.upgradeBtnText}>✨ Upgrade to Plus or Pro</Text>
-              </TouchableOpacity>
-            )}
-          </View>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>My Profile</Text>
         </View>
 
-        {/* Quick Stats */}
+        {/* Profile Card */}
+        <View style={styles.profileCard}>
+          <View style={styles.avatarWrap}>
+            <View style={styles.avatar}>
+              <Text style={styles.avatarText}>{initials}</Text>
+            </View>
+            <TouchableOpacity style={styles.editAvatarBtn}
+              onPress={() => Alert.alert('Change Photo', 'Photo upload coming soon! 💜')}>
+              <Text style={styles.editAvatarIcon}>📷</Text>
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.profileName}>{userName || 'Bellava User'}</Text>
+          <Text style={styles.profileEmail}>{userEmail || 'user@bellava.com'}</Text>
+          <View style={[styles.planBadge,
+            userPlan === 'PRO' ? styles.planPro :
+            userPlan === 'PLUS' ? styles.planPlus :
+            styles.planFree
+          ]}>
+            <Text style={styles.planBadgeText}>
+              {userPlan === 'PRO' ? '👑 PRO' : userPlan === 'PLUS' ? '⭐ PLUS' : '🆓 FREE'} Member
+            </Text>
+          </View>
+          {userPlan === 'FREE' && (
+            <TouchableOpacity style={styles.upgradeBtn}
+              onPress={() => Alert.alert('Upgrade 💜', 'In-app purchases coming soon!')}>
+              <Text style={styles.upgradeBtnText}>✨ Upgrade to PLUS — £4.99/mo</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {/* Stats Row */}
         <View style={styles.statsRow}>
-          {[
-            { emoji: '🌸', value: '28', label: 'Cycle Days' },
-            { emoji: '📊', value: '12', label: 'Logs' },
-            { emoji: '🤖', value: '5', label: 'Bella Chats' },
-          ].map((stat, i) => (
+          {STATS.map((stat, i) => (
             <View key={i} style={styles.statCard}>
               <Text style={styles.statEmoji}>{stat.emoji}</Text>
               <Text style={styles.statValue}>{stat.value}</Text>
@@ -274,645 +114,201 @@ export default function ProfileScreen({
           ))}
         </View>
 
-        {/* Journey */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>🌸 My Journey</Text>
-          <TouchableOpacity
-            style={styles.settingRow}
-            onPress={() => setShowJourneyModal(true)}
-          >
-            <Text style={styles.settingEmoji}>{currentJourney?.emoji || '💜'}</Text>
-            <View style={styles.settingInfo}>
-              <Text style={styles.settingLabel}>Current Journey</Text>
-              <Text style={styles.settingValue}>{currentJourney?.label}</Text>
+        {/* Quick Toggles */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Quick Settings</Text>
+          <View style={styles.toggleRow}>
+            <View style={styles.toggleLeft}>
+              <Text style={styles.toggleEmoji}>🔔</Text>
+              <Text style={styles.toggleLabel}>Notifications</Text>
             </View>
-            <Text style={styles.settingArrow}>›</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Language */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>🌍 Language</Text>
-          <TouchableOpacity
-            style={styles.settingRow}
-            onPress={() => setShowLanguageModal(true)}
-          >
-            <Text style={styles.settingEmoji}>{currentLanguage.flag}</Text>
-            <View style={styles.settingInfo}>
-              <Text style={styles.settingLabel}>App Language</Text>
-              <Text style={styles.settingValue}>{currentLanguage.label}</Text>
-            </View>
-            <Text style={styles.settingArrow}>›</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Notifications */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>🔔 Notifications</Text>
-          {NOTIFICATION_SETTINGS.map(setting => (
-            <View key={setting.id} style={styles.notifRow}>
-              <Text style={styles.notifEmoji}>{setting.emoji}</Text>
-              <Text style={styles.notifLabel}>{setting.label}</Text>
-              <TouchableOpacity
-                style={[styles.toggle, notifications[setting.id] && styles.toggleOn]}
-                onPress={() => toggleNotification(setting.id)}
-              >
-                <View style={[styles.toggleThumb, notifications[setting.id] && styles.toggleThumbOn]} />
-              </TouchableOpacity>
-            </View>
-          ))}
-        </View>
-
-        {/* Account */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>⚙️ Account</Text>
-          {[
-            { emoji: '✏️', label: 'Edit Profile', action: () => setShowEditProfile(true) },
-            { emoji: '🔒', label: 'Change Password', action: () => setShowChangePassword(true) },
-            { emoji: '⭐', label: 'Manage Subscription', action: () => onNavigate('subscription') },
-            { emoji: '📥', label: 'Download My Data', action: () => setShowDownloadData(true) },
-          ].map((item, i) => (
-            <TouchableOpacity key={i} style={styles.settingRow} onPress={item.action}>
-              <Text style={styles.settingEmoji}>{item.emoji}</Text>
-              <Text style={[styles.settingLabel, { flex: 1 }]}>{item.label}</Text>
-              <Text style={styles.settingArrow}>›</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {/* Legal & Support */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>📋 Legal & Support</Text>
-          {[
-            { emoji: '🔒', label: 'Privacy Policy', action: () => setShowPrivacyPolicy(true) },
-            { emoji: '📄', label: 'Terms of Service', action: () => setShowTerms(true) },
-            { emoji: '⚕️', label: 'Medical Disclaimer', action: () => setShowMedicalDisclaimer(true) },
-            { emoji: '💬', label: 'Contact Support', action: handleContactSupport },
-            { emoji: '⭐', label: 'Rate Bellava', action: handleRateBellava },
-            { emoji: '🐛', label: 'Report a Bug', action: handleReportBug },
-          ].map((item, i) => (
-            <TouchableOpacity key={i} style={styles.settingRow} onPress={item.action}>
-              <Text style={styles.settingEmoji}>{item.emoji}</Text>
-              <Text style={[styles.settingLabel, { flex: 1 }]}>{item.label}</Text>
-              <Text style={styles.settingArrow}>›</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {/* App Info — Secret Admin Access */}
-        <View style={styles.appInfo}>
-          <TouchableOpacity
-            onPress={handleSecretTap}
-            activeOpacity={1}
-          >
-            <View style={styles.appLogoSmall}>
-              <Text style={styles.appLogoLetter}>B</Text>
-            </View>
-          </TouchableOpacity>
-          <Text style={styles.appName}>Bellava</Text>
-          <Text style={styles.appVersion}>Version 1.0.0 — by Reine Mande Ltd</Text>
-          <Text style={styles.appTagline}>Your health. Your body. Your power. 💜</Text>
-        </View>
-
-        <TouchableOpacity
-          style={styles.logoutBtn}
-          onPress={() => setShowLogoutModal(true)}
-        >
-          <Text style={styles.logoutBtnText}>Sign Out</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.deleteBtn}
-          onPress={() => setShowDeleteModal(true)}
-        >
-          <Text style={styles.deleteBtnText}>Delete Account</Text>
-        </TouchableOpacity>
-
-        <View style={{ height: 40 }} />
-      </ScrollView>
-
-      {/* Edit Profile Modal */}
-      <Modal visible={showEditProfile} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalSheet}>
-            <View style={styles.modalHandle} />
-            <Text style={styles.modalTitle}>✏️ Edit Profile</Text>
-            <Text style={styles.inputLabel}>First Name</Text>
-            <TextInput
-              style={styles.input}
-              value={editName}
-              onChangeText={setEditName}
-              placeholder="Your name"
-              placeholderTextColor={COLORS.textLight}
+            <Switch
+              value={notifications}
+              onValueChange={setNotifications}
+              trackColor={{ false: '#EDE0E8', true: '#C9748F' }}
+              thumbColor="#fff"
             />
-            <Text style={styles.inputLabel}>Email Address</Text>
-            <TextInput
-              style={styles.input}
-              value={editEmail}
-              onChangeText={setEditEmail}
-              placeholder="your@email.com"
-              placeholderTextColor={COLORS.textLight}
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-            <TouchableOpacity style={styles.saveBtn} onPress={handleSaveProfile}>
-              <Text style={styles.saveBtnText}>Save Changes 💜</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.closeBtn} onPress={() => setShowEditProfile(false)}>
-              <Text style={styles.closeBtnText}>Cancel</Text>
-            </TouchableOpacity>
           </View>
-        </View>
-      </Modal>
-
-      {/* Change Password Modal */}
-      <Modal visible={showChangePassword} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalSheet}>
-            <View style={styles.modalHandle} />
-            <Text style={styles.modalTitle}>🔒 Change Password</Text>
-            <Text style={styles.inputLabel}>Current Password</Text>
-            <TextInput
-              style={styles.input}
-              value={currentPassword}
-              onChangeText={setCurrentPassword}
-              placeholder="Enter current password"
-              placeholderTextColor={COLORS.textLight}
-              secureTextEntry
-            />
-            <Text style={styles.inputLabel}>New Password</Text>
-            <TextInput
-              style={styles.input}
-              value={newPassword}
-              onChangeText={setNewPassword}
-              placeholder="At least 8 characters"
-              placeholderTextColor={COLORS.textLight}
-              secureTextEntry
-            />
-            <Text style={styles.inputLabel}>Confirm New Password</Text>
-            <TextInput
-              style={styles.input}
-              value={confirmNewPassword}
-              onChangeText={setConfirmNewPassword}
-              placeholder="Repeat new password"
-              placeholderTextColor={COLORS.textLight}
-              secureTextEntry
-            />
-            <TouchableOpacity style={styles.saveBtn} onPress={handleChangePassword}>
-              <Text style={styles.saveBtnText}>Update Password 🔒</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.closeBtn} onPress={() => setShowChangePassword(false)}>
-              <Text style={styles.closeBtnText}>Cancel</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Privacy Policy Modal */}
-      <Modal visible={showPrivacyPolicy} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalSheetTall}>
-            <View style={styles.modalHandle} />
-            <Text style={styles.modalTitle}>🔒 Privacy Policy</Text>
-            <ScrollView style={styles.legalScroll} showsVerticalScrollIndicator={false}>
-              <Text style={styles.legalText}>{PRIVACY_POLICY}</Text>
-              <View style={{ height: 20 }} />
-            </ScrollView>
-            <TouchableOpacity style={styles.saveBtn} onPress={() => setShowPrivacyPolicy(false)}>
-              <Text style={styles.saveBtnText}>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Terms Modal */}
-      <Modal visible={showTerms} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalSheetTall}>
-            <View style={styles.modalHandle} />
-            <Text style={styles.modalTitle}>📄 Terms of Service</Text>
-            <ScrollView style={styles.legalScroll} showsVerticalScrollIndicator={false}>
-              <Text style={styles.legalText}>{TERMS_OF_SERVICE}</Text>
-              <View style={{ height: 20 }} />
-            </ScrollView>
-            <TouchableOpacity style={styles.saveBtn} onPress={() => setShowTerms(false)}>
-              <Text style={styles.saveBtnText}>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Medical Disclaimer Modal */}
-      <Modal visible={showMedicalDisclaimer} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalSheetTall}>
-            <View style={styles.modalHandle} />
-            <Text style={styles.modalTitle}>⚕️ Medical Disclaimer</Text>
-            <ScrollView style={styles.legalScroll} showsVerticalScrollIndicator={false}>
-              <Text style={styles.legalText}>{MEDICAL_DISCLAIMER}</Text>
-              <View style={{ height: 20 }} />
-            </ScrollView>
-            <TouchableOpacity style={styles.saveBtn} onPress={() => setShowMedicalDisclaimer(false)}>
-              <Text style={styles.saveBtnText}>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Download Data Modal */}
-      <Modal visible={showDownloadData} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalSheet, { alignItems: 'center' }]}>
-            <View style={styles.modalHandle} />
-            <Text style={styles.modalEmoji}>📥</Text>
-            <Text style={styles.modalTitle}>Download My Data</Text>
-            <Text style={styles.modalSub}>
-              Under UK GDPR you have the right to download all data Bellava holds about you.
-            </Text>
-            <TouchableOpacity
-              style={styles.saveBtn}
-              onPress={() => {
-                setShowDownloadData(false);
-                Alert.alert(
-                  '📥 Request Received',
-                  'We will send your data to ' + (userEmail || 'your email') + ' within 30 days. 💜',
-                  [{ text: 'OK' }]
-                );
-              }}
-            >
-              <Text style={styles.saveBtnText}>Request My Data 📥</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.closeBtn} onPress={() => setShowDownloadData(false)}>
-              <Text style={styles.closeBtnText}>Cancel</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Avatar Modal */}
-      <Modal visible={showAvatarModal} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalSheet}>
-            <View style={styles.modalHandle} />
-            <Text style={styles.modalTitle}>Choose Your Colour 🎨</Text>
-            <View style={styles.colourGrid}>
-              {AVATAR_COLORS.map((color, i) => (
-                <TouchableOpacity
-                  key={i}
-                  style={[
-                    styles.colourDot,
-                    { backgroundColor: color },
-                    avatarColor === color && styles.colourDotSelected,
-                  ]}
-                  onPress={() => setAvatarColor(color)}
-                >
-                  {avatarColor === color && (
-                    <Text style={styles.colourCheck}>✓</Text>
-                  )}
-                </TouchableOpacity>
-              ))}
+          <View style={styles.divider} />
+          <View style={styles.toggleRow}>
+            <View style={styles.toggleLeft}>
+              <Text style={styles.toggleEmoji}>🌸</Text>
+              <Text style={styles.toggleLabel}>Period Reminders</Text>
             </View>
-            <View style={styles.avatarPreview}>
-              <View style={[styles.avatarPreviewCircle, { backgroundColor: avatarColor }]}>
-                <Text style={styles.avatarPreviewLetter}>
-                  {firstName.charAt(0).toUpperCase()}
-                </Text>
-              </View>
-              <Text style={styles.avatarPreviewText}>Preview</Text>
+            <Switch
+              value={periodReminders}
+              onValueChange={setPeriodReminders}
+              trackColor={{ false: '#EDE0E8', true: '#C9748F' }}
+              thumbColor="#fff"
+            />
+          </View>
+          <View style={styles.divider} />
+          <View style={styles.toggleRow}>
+            <View style={styles.toggleLeft}>
+              <Text style={styles.toggleEmoji}>🌙</Text>
+              <Text style={styles.toggleLabel}>Dark Mode</Text>
             </View>
-            <TouchableOpacity style={styles.saveBtn} onPress={() => setShowAvatarModal(false)}>
-              <Text style={styles.saveBtnText}>Save 💜</Text>
-            </TouchableOpacity>
+            <Switch
+              value={darkMode}
+              onValueChange={setDarkMode}
+              trackColor={{ false: '#EDE0E8', true: '#C9748F' }}
+              thumbColor="#fff"
+            />
           </View>
         </View>
-      </Modal>
 
-      {/* Journey Modal */}
-      <Modal visible={showJourneyModal} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalSheet}>
-            <View style={styles.modalHandle} />
-            <Text style={styles.modalTitle}>Change Your Journey 🌸</Text>
-            <Text style={styles.modalSub}>Your app will personalise to your new journey</Text>
-            {JOURNEYS.map(j => (
-              <TouchableOpacity
-                key={j.id}
-                style={[
-                  styles.journeyRow,
-                  journey === j.id && {
-                    backgroundColor: `${j.color}10`,
-                    borderColor: j.color,
-                  },
-                ]}
-                onPress={() => {
-                  setJourney(j.id);
-                  setShowJourneyModal(false);
-                  Alert.alert(
-                    `${j.emoji} Journey Updated`,
-                    `Your journey has been changed to ${j.label}. 💜`,
-                    [{ text: 'Great!' }]
-                  );
-                }}
-              >
-                <Text style={styles.journeyRowEmoji}>{j.emoji}</Text>
-                <Text style={[
-                  styles.journeyRowLabel,
-                  journey === j.id && { color: j.color, fontWeight: '700' },
-                ]}>
-                  {j.label}
-                </Text>
-                {journey === j.id && (
-                  <Text style={[styles.journeyCheck, { color: j.color }]}>✓</Text>
-                )}
-              </TouchableOpacity>
-            ))}
-            <TouchableOpacity style={styles.closeBtn} onPress={() => setShowJourneyModal(false)}>
-              <Text style={styles.closeBtnText}>Cancel</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Language Modal */}
-      <Modal visible={showLanguageModal} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalSheet}>
-            <View style={styles.modalHandle} />
-            <Text style={styles.modalTitle}>Choose Language 🌍</Text>
+        {/* Language Picker */}
+        {showLanguage && (
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>🌍 Select Language</Text>
             {LANGUAGES.map(lang => (
               <TouchableOpacity
-                key={lang.code}
-                style={[styles.langRow, language === lang.code && styles.langRowActive]}
+                key={lang}
+                style={styles.langRow}
                 onPress={() => {
-                  setLanguage(lang.code);
-                  setShowLanguageModal(false);
+                  setSelectedLanguage(lang);
+                  setShowLanguage(false);
+                  Alert.alert('Language Changed! 💜', `App language set to ${lang}`);
                 }}
               >
-                <Text style={styles.langFlag}>{lang.flag}</Text>
-                <Text style={[
-                  styles.langLabel,
-                  language === lang.code && { color: COLORS.primary, fontWeight: '700' },
-                ]}>
-                  {lang.label}
-                </Text>
-                {language === lang.code && (
+                <Text style={styles.langText}>{lang}</Text>
+                {selectedLanguage === lang && (
                   <Text style={styles.langCheck}>✓</Text>
                 )}
               </TouchableOpacity>
             ))}
-            <TouchableOpacity style={styles.closeBtn} onPress={() => setShowLanguageModal(false)}>
-              <Text style={styles.closeBtnText}>Close</Text>
-            </TouchableOpacity>
           </View>
-        </View>
-      </Modal>
+        )}
 
-      {/* Logout Modal */}
-      <Modal visible={showLogoutModal} animationType="fade" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalSheet, { alignItems: 'center' }]}>
-            <View style={styles.modalHandle} />
-            <Text style={styles.modalEmoji}>👋</Text>
-            <Text style={styles.modalTitle}>Sign out?</Text>
-            <Text style={styles.modalSub}>
-              You can always sign back in to access your Bellava account.
-            </Text>
+        {/* Menu Items */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Settings</Text>
+          {MENU_ITEMS.map((item, i) => (
             <TouchableOpacity
-              style={styles.confirmLogoutBtn}
-              onPress={() => { setShowLogoutModal(false); onLogout(); }}
+              key={item.id}
+              style={[styles.menuRow, i < MENU_ITEMS.length - 1 && styles.menuRowBorder]}
+              onPress={() => handleMenuItem(item)}
             >
-              <Text style={styles.confirmLogoutText}>Yes, sign out</Text>
+              <View style={[styles.menuIcon, { backgroundColor: item.color + '22' }]}>
+                <Text style={styles.menuEmoji}>{item.emoji}</Text>
+              </View>
+              <Text style={styles.menuLabel}>{item.label}</Text>
+              <Text style={styles.menuArrow}>›</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.closeBtn} onPress={() => setShowLogoutModal(false)}>
-              <Text style={styles.closeBtnText}>Cancel</Text>
-            </TouchableOpacity>
-          </View>
+          ))}
         </View>
-      </Modal>
 
-      {/* Delete Modal */}
-      <Modal visible={showDeleteModal} animationType="fade" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalSheet, { alignItems: 'center' }]}>
-            <View style={styles.modalHandle} />
-            <Text style={styles.modalEmoji}>⚠️</Text>
-            <Text style={styles.modalTitle}>Delete Account?</Text>
-            <Text style={styles.modalSub}>
-              This will permanently delete your account and all data. This cannot be undone.
-            </Text>
-            <TouchableOpacity
-              style={styles.confirmDeleteBtn}
-              onPress={() => { setShowDeleteModal(false); onLogout(); }}
-            >
-              <Text style={styles.confirmDeleteText}>Yes, delete my account</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.closeBtn} onPress={() => setShowDeleteModal(false)}>
-              <Text style={styles.closeBtnText}>Cancel</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+        {/* Logout */}
+        <TouchableOpacity
+          style={styles.logoutBtn}
+          onPress={() => Alert.alert(
+            'Log Out',
+            'Are you sure you want to log out?',
+            [
+              { text: 'Cancel' },
+              { text: 'Log Out', style: 'destructive', onPress: () => onLogout && onLogout() }
+            ]
+          )}
+        >
+          <Text style={styles.logoutText}>🚪 Log Out</Text>
+        </TouchableOpacity>
+
+        <Text style={styles.version}>Bellava v1.0.0 • Made with 💜 by Reine Mande Ltd</Text>
+
+        <View style={{ height: 100 }} />
+      </ScrollView>
     </SafeAreaView>
   );
 }
-
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: COLORS.background },
-  content: { flex: 1 },
-  heroCard: {
-    backgroundColor: COLORS.primary,
-    paddingBottom: 28, overflow: 'hidden',
+  container: { flex: 1, backgroundColor: '#FAF0F5' },
+  header: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 8 },
+  headerTitle: { fontSize: 28, fontWeight: '800', color: '#2D1B2E' },
+  profileCard: {
+    backgroundColor: '#fff', borderRadius: 24, marginHorizontal: 20,
+    marginBottom: 16, padding: 24, alignItems: 'center',
+    shadowColor: '#C9748F', shadowOpacity: 0.1, shadowRadius: 12, elevation: 4,
   },
-  heroBg: {
-    position: 'absolute', top: -60, right: -60,
-    width: 200, height: 200, borderRadius: 100,
-    backgroundColor: 'rgba(255,255,255,0.1)',
+  avatarWrap: { position: 'relative', marginBottom: 12 },
+  avatar: {
+    width: 90, height: 90, borderRadius: 45,
+    backgroundColor: '#C9748F', alignItems: 'center', justifyContent: 'center',
+    shadowColor: '#C9748F', shadowOpacity: 0.3, shadowRadius: 8, elevation: 4,
   },
-  heroContent: { alignItems: 'center', paddingTop: 28, paddingHorizontal: 24 },
-  avatarWrap: { position: 'relative', marginBottom: 14 },
-  avatarCircle: {
-    width: 88, height: 88, borderRadius: 44,
-    alignItems: 'center', justifyContent: 'center',
-    borderWidth: 3, borderColor: '#fff',
-  },
-  avatarLetter: { fontSize: 38, fontWeight: '800', color: '#fff' },
-  editAvatarBadge: {
+  avatarText: { color: '#fff', fontSize: 36, fontWeight: '800' },
+  editAvatarBtn: {
     position: 'absolute', bottom: 0, right: 0,
-    width: 28, height: 28, borderRadius: 14,
-    backgroundColor: '#fff',
-    alignItems: 'center', justifyContent: 'center',
+    width: 30, height: 30, borderRadius: 15,
+    backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center',
+    shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 4, elevation: 2,
   },
-  editAvatarIcon: { fontSize: 14 },
-  profileName: { fontSize: 24, fontWeight: '800', color: '#fff', marginBottom: 4 },
-  profileEmail: { fontSize: 14, color: 'rgba(255,255,255,0.8)', marginBottom: 14 },
-  planBadge: {
-    borderRadius: 50, paddingHorizontal: 16, paddingVertical: 7, marginBottom: 10,
-  },
-  planBadgeText: { color: '#fff', fontWeight: '700', fontSize: 14 },
-  journeyBadge: {
-    flexDirection: 'row', alignItems: 'center', gap: 6,
-    borderRadius: 50, paddingHorizontal: 14, paddingVertical: 8,
-    borderWidth: 1, marginBottom: 14,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    borderColor: 'rgba(255,255,255,0.3)',
-  },
-  journeyBadgeEmoji: { fontSize: 16 },
-  journeyBadgeText: { fontSize: 13, fontWeight: '700', color: '#fff' },
+  editAvatarIcon: { fontSize: 16 },
+  profileName: { fontSize: 22, fontWeight: '800', color: '#2D1B2E', marginBottom: 4 },
+  profileEmail: { fontSize: 14, color: '#9B8FA0', marginBottom: 12 },
+  planBadge: { borderRadius: 20, paddingHorizontal: 16, paddingVertical: 6, marginBottom: 12 },
+  planFree: { backgroundColor: '#EDE0E8' },
+  planPlus: { backgroundColor: '#F0EAFF' },
+  planPro: { backgroundColor: '#FFF3CD' },
+  planBadgeText: { fontSize: 13, fontWeight: '800', color: '#2D1B2E' },
   upgradeBtn: {
-    backgroundColor: '#fff', borderRadius: 50,
+    backgroundColor: '#C9748F', borderRadius: 50,
     paddingHorizontal: 20, paddingVertical: 10,
   },
-  upgradeBtnText: { color: COLORS.primary, fontWeight: '700', fontSize: 14 },
-  statsRow: { flexDirection: 'row', margin: 16, gap: 12 },
+  upgradeBtnText: { color: '#fff', fontWeight: '700', fontSize: 13 },
+  statsRow: {
+    flexDirection: 'row', marginHorizontal: 20,
+    marginBottom: 16, gap: 10,
+  },
   statCard: {
-    flex: 1, backgroundColor: COLORS.white,
-    borderRadius: 16, padding: 14, alignItems: 'center',
-    shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 8, elevation: 2,
+    flex: 1, backgroundColor: '#fff', borderRadius: 16,
+    padding: 12, alignItems: 'center',
+    shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 6, elevation: 2,
   },
-  statEmoji: { fontSize: 22, marginBottom: 6 },
-  statValue: { fontSize: 20, fontWeight: '800', color: COLORS.primary },
-  statLabel: { fontSize: 11, color: COLORS.textLight, marginTop: 2 },
-  section: {
-    backgroundColor: COLORS.white, marginTop: 12,
-    paddingHorizontal: 20, paddingTop: 16, paddingBottom: 8,
+  statEmoji: { fontSize: 20, marginBottom: 4 },
+  statValue: { fontSize: 18, fontWeight: '800', color: '#C9748F', marginBottom: 2 },
+  statLabel: { fontSize: 10, color: '#9B8FA0', textAlign: 'center', fontWeight: '600' },
+  card: {
+    backgroundColor: '#fff', borderRadius: 20, marginHorizontal: 20,
+    marginBottom: 16, padding: 16, shadowColor: '#000',
+    shadowOpacity: 0.04, shadowRadius: 8, elevation: 2,
   },
-  sectionTitle: { fontSize: 15, fontWeight: '800', color: COLORS.text, marginBottom: 12 },
-  settingRow: {
+  cardTitle: { fontSize: 16, fontWeight: '800', color: '#2D1B2E', marginBottom: 12 },
+  toggleRow: {
+    flexDirection: 'row', alignItems: 'center',
+    justifyContent: 'space-between', paddingVertical: 8,
+  },
+  toggleLeft: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  toggleEmoji: { fontSize: 20 },
+  toggleLabel: { fontSize: 15, fontWeight: '600', color: '#2D1B2E' },
+  divider: { height: 1, backgroundColor: '#FAF0F5', marginVertical: 4 },
+  langRow: {
+    flexDirection: 'row', justifyContent: 'space-between',
+    alignItems: 'center', paddingVertical: 12,
+    borderBottomWidth: 1, borderBottomColor: '#FAF0F5',
+  },
+  langText: { fontSize: 15, color: '#2D1B2E', fontWeight: '600' },
+  langCheck: { fontSize: 16, color: '#C9748F', fontWeight: '800' },
+  menuRow: {
     flexDirection: 'row', alignItems: 'center',
     paddingVertical: 12, gap: 12,
-    borderBottomWidth: 1, borderBottomColor: COLORS.border,
   },
-  settingEmoji: { fontSize: 20 },
-  settingInfo: { flex: 1 },
-  settingLabel: { fontSize: 15, color: COLORS.text, fontWeight: '500' },
-  settingValue: { fontSize: 13, color: COLORS.textLight, marginTop: 2 },
-  settingArrow: { fontSize: 22, color: COLORS.textLight },
-  notifRow: {
-    flexDirection: 'row', alignItems: 'center',
-    paddingVertical: 12, gap: 12,
-    borderBottomWidth: 1, borderBottomColor: COLORS.border,
-  },
-  notifEmoji: { fontSize: 20 },
-  notifLabel: { flex: 1, fontSize: 15, color: COLORS.text },
-  toggle: {
-    width: 48, height: 28, borderRadius: 14,
-    backgroundColor: COLORS.border, padding: 2, justifyContent: 'center',
-  },
-  toggleOn: { backgroundColor: COLORS.primary },
-  toggleThumb: { width: 24, height: 24, borderRadius: 12, backgroundColor: '#fff' },
-  toggleThumbOn: { alignSelf: 'flex-end' },
-  appInfo: {
-    alignItems: 'center', padding: 24,
-    backgroundColor: COLORS.white, marginTop: 12,
-  },
-  appLogoSmall: {
-    width: 48, height: 48, borderRadius: 24,
-    backgroundColor: COLORS.primary,
-    alignItems: 'center', justifyContent: 'center', marginBottom: 8,
-  },
-  appLogoLetter: { color: '#fff', fontSize: 22, fontWeight: '800' },
-  appName: { fontSize: 20, fontWeight: '800', color: COLORS.text, marginBottom: 4 },
-  appVersion: { fontSize: 12, color: COLORS.textLight, marginBottom: 4 },
-  appTagline: { fontSize: 13, color: COLORS.primary, fontWeight: '600' },
-  logoutBtn: {
-    margin: 16, marginBottom: 8,
-    borderWidth: 2, borderColor: COLORS.border,
-    borderRadius: 50, paddingVertical: 14,
-    alignItems: 'center', backgroundColor: COLORS.white,
-  },
-  logoutBtnText: { color: COLORS.text, fontWeight: '700', fontSize: 16 },
-  deleteBtn: {
-    marginHorizontal: 16, marginBottom: 8,
-    borderRadius: 50, paddingVertical: 14, alignItems: 'center',
-  },
-  deleteBtnText: { color: '#E74C3C', fontWeight: '600', fontSize: 15 },
-  modalOverlay: {
-    flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end',
-  },
-  modalSheet: {
-    backgroundColor: COLORS.white, borderTopLeftRadius: 28,
-    borderTopRightRadius: 28, padding: 24,
-  },
-  modalSheetTall: {
-    backgroundColor: COLORS.white, borderTopLeftRadius: 28,
-    borderTopRightRadius: 28, padding: 24, maxHeight: '90%',
-  },
-  modalHandle: {
-    width: 40, height: 4, borderRadius: 2,
-    backgroundColor: COLORS.border, alignSelf: 'center', marginBottom: 20,
-  },
-  modalEmoji: { fontSize: 44, marginBottom: 12, textAlign: 'center' },
-  modalTitle: { fontSize: 20, fontWeight: '800', color: COLORS.text, marginBottom: 6 },
-  modalSub: { fontSize: 14, color: COLORS.textLight, marginBottom: 20, lineHeight: 22 },
-  inputLabel: { fontSize: 14, fontWeight: '700', color: COLORS.text, marginBottom: 8, marginTop: 4 },
-  input: {
-    backgroundColor: COLORS.background, borderRadius: 14,
-    paddingHorizontal: 16, paddingVertical: 14,
-    fontSize: 15, color: COLORS.text,
-    borderWidth: 1.5, borderColor: COLORS.border, marginBottom: 16,
-  },
-  legalScroll: { maxHeight: 400, marginBottom: 16 },
-  legalText: { fontSize: 13, color: COLORS.text, lineHeight: 22 },
-  saveBtn: {
-    backgroundColor: COLORS.primary, borderRadius: 50,
-    paddingVertical: 15, alignItems: 'center', marginBottom: 10,
-  },
-  saveBtnText: { color: '#fff', fontWeight: '700', fontSize: 16 },
-  colourGrid: {
-    flexDirection: 'row', flexWrap: 'wrap',
-    gap: 14, justifyContent: 'center', marginBottom: 20,
-  },
-  colourDot: {
-    width: 52, height: 52, borderRadius: 26,
+  menuRowBorder: { borderBottomWidth: 1, borderBottomColor: '#FAF0F5' },
+  menuIcon: {
+    width: 40, height: 40, borderRadius: 12,
     alignItems: 'center', justifyContent: 'center',
   },
-  colourDotSelected: {
-    borderWidth: 3, borderColor: '#fff',
-    shadowColor: '#000', shadowOpacity: 0.2,
-    shadowRadius: 8, elevation: 4,
+  menuEmoji: { fontSize: 20 },
+  menuLabel: { flex: 1, fontSize: 15, fontWeight: '600', color: '#2D1B2E' },
+  menuArrow: { fontSize: 20, color: '#9B8FA0' },
+  logoutBtn: {
+    marginHorizontal: 20, marginBottom: 12, backgroundColor: '#fff',
+    borderRadius: 20, padding: 16, alignItems: 'center',
+    borderWidth: 1.5, borderColor: '#E74C3C',
+    shadowColor: '#E74C3C', shadowOpacity: 0.08, shadowRadius: 8, elevation: 2,
   },
-  colourCheck: { color: '#fff', fontWeight: '800', fontSize: 20 },
-  avatarPreview: { alignItems: 'center', marginBottom: 20 },
-  avatarPreviewCircle: {
-    width: 72, height: 72, borderRadius: 36,
-    alignItems: 'center', justifyContent: 'center', marginBottom: 8,
+  logoutText: { fontSize: 16, fontWeight: '800', color: '#E74C3C' },
+  version: {
+    textAlign: 'center', fontSize: 12,
+    color: '#9B8FA0', marginBottom: 8,
   },
-  avatarPreviewLetter: { color: '#fff', fontSize: 30, fontWeight: '800' },
-  avatarPreviewText: { fontSize: 13, color: COLORS.textLight },
-  journeyRow: {
-    flexDirection: 'row', alignItems: 'center',
-    paddingVertical: 14, gap: 14,
-    borderBottomWidth: 1, borderBottomColor: COLORS.border,
-    borderRadius: 12, paddingHorizontal: 8,
-    borderWidth: 1, borderColor: 'transparent', marginBottom: 6,
-  },
-  journeyRowEmoji: { fontSize: 26 },
-  journeyRowLabel: { fontSize: 16, color: COLORS.text, flex: 1 },
-  journeyCheck: { fontSize: 18, fontWeight: '700' },
-  langRow: {
-    flexDirection: 'row', alignItems: 'center',
-    paddingVertical: 14, gap: 14,
-    borderBottomWidth: 1, borderBottomColor: COLORS.border,
-  },
-  langRowActive: { backgroundColor: COLORS.primaryLight },
-  langFlag: { fontSize: 26 },
-  langLabel: { fontSize: 16, color: COLORS.text, flex: 1 },
-  langCheck: { fontSize: 18, color: COLORS.primary, fontWeight: '700' },
-  closeBtn: {
-    borderWidth: 2, borderColor: COLORS.border, borderRadius: 50,
-    paddingVertical: 14, alignItems: 'center',
-  },
-  closeBtnText: { color: COLORS.textLight, fontWeight: '700', fontSize: 15 },
-  confirmLogoutBtn: {
-    width: '100%', backgroundColor: COLORS.primary,
-    borderRadius: 50, paddingVertical: 15,
-    alignItems: 'center', marginBottom: 10,
-  },
-  confirmLogoutText: { color: '#fff', fontWeight: '700', fontSize: 16 },
-  confirmDeleteBtn: {
-    width: '100%', backgroundColor: '#E74C3C',
-    borderRadius: 50, paddingVertical: 15,
-    alignItems: 'center', marginBottom: 10,
-  },
-  confirmDeleteText: { color: '#fff', fontWeight: '700', fontSize: 16 },
 });
