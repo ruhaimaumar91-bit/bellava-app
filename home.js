@@ -1,409 +1,371 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View, Text, StyleSheet, ScrollView,
   TouchableOpacity, SafeAreaView, StatusBar,
-  Dimensions, Animated,
+  Alert, Animated,
 } from 'react-native';
 import COLORS from './colors';
-import CheckInSummaryCard from './checkinsummarycard';
 
-const { width } = Dimensions.get('window');
-
-const FEATURES = [
-  { id: 'cycle', emoji: '🌸', title: 'Cycle Tracker', subtitle: 'Track your period', bg: '#FFE4EC', accent: '#C9748F' },
-  { id: 'bella', emoji: '🤖', title: 'Ask Bella', subtitle: 'Your AI nurse', bg: '#E8E4FF', accent: '#7B6B9E' },
-  { id: 'tracker', emoji: '📊', title: 'Daily Tracker', subtitle: 'Log your symptoms', bg: '#E4F4FF', accent: '#4A90C4' },
-  { id: 'community', emoji: '👥', title: 'Community', subtitle: 'Connect with women', bg: '#E4FFE8', accent: '#4AC455' },
-  { id: 'academy', emoji: '📚', title: 'Academy', subtitle: 'Learn about your body', bg: '#FFF4E4', accent: '#C4844A' },
-  { id: 'carefinder', emoji: '🏥', title: 'Care Finder', subtitle: 'Clinics near you', bg: '#F4E4FF', accent: '#9B4AC4' },
-  { id: 'nutrition', emoji: '🥗', title: 'Nutrition', subtitle: 'Eat for your cycle', bg: '#F0FFE4', accent: '#7AC44A' },
-  { id: 'symptomchecker', emoji: '🔍', title: 'Symptom Checker', subtitle: 'Check how you feel', bg: '#FFE4E4', accent: '#C44A4A' },
-  { id: 'babynames', emoji: '👶', title: 'Baby Names', subtitle: 'Find the perfect name', bg: '#FFE4F4', accent: '#C44A90' },
-  { id: 'intimacy', emoji: '💜', title: 'Intimacy Health', subtitle: 'Know your body', bg: '#F4E4FF', accent: '#9B59B6' },
-  { id: 'pregnancy', emoji: '🤰', title: 'Pregnancy Tracker', subtitle: 'Week by week guide', bg: '#F5EEFF', accent: '#9B59B6' },
-  { id: 'notifications', emoji: '🔔', title: 'Notifications', subtitle: 'Your reminders', bg: '#FFFDE4', accent: '#C4B44A' },
-  { id: 'subscription', emoji: '⭐', title: 'Upgrade', subtitle: 'Unlock all features', bg: '#FFF8E4', accent: '#F59E0B' },
+const QUICK_ACTIONS = [
+  { id: '1', emoji: '🌸', label: 'Log Period', color: '#E74C3C', bg: '#FFE8E8' },
+  { id: '2', emoji: '💊', label: 'Medication', color: '#9B59B6', bg: '#F0EAFF' },
+  { id: '3', emoji: '💧', label: 'Water', color: '#3498DB', bg: '#EAF4FF' },
+  { id: '4', emoji: '😴', label: 'Sleep', color: '#27AE60', bg: '#EAFAF1' },
 ];
 
-const CYCLE_PHASES = [
-  { id: 'menstrual', label: 'Menstrual', emoji: '🌙', color: '#E74C3C', day: '1-5' },
-  { id: 'follicular', label: 'Follicular', emoji: '🌱', color: '#27AE60', day: '6-13' },
-  { id: 'ovulation', label: 'Ovulation', emoji: '✨', color: '#F39C12', day: '14-16' },
-  { id: 'luteal', label: 'Luteal', emoji: '🌕', color: '#8E44AD', day: '17-28' },
+const HEALTH_TIPS = [
+  { emoji: '🥗', tip: 'Iron-rich foods help during your period. Try spinach and lentils today!', color: '#27AE60' },
+  { emoji: '💆', tip: 'Stress affects your cycle. Try 5 minutes of deep breathing today.', color: '#9B59B6' },
+  { emoji: '💧', tip: 'Stay hydrated! Aim for 8 glasses of water to reduce bloating.', color: '#3498DB' },
+  { emoji: '🏃', tip: 'Light exercise during your luteal phase can reduce PMS symptoms.', color: '#C9748F' },
 ];
 
-const JOURNEY_CONTENT = {
-  conceive: {
-    emoji: '🌱',
-    title: 'TTC Journey',
-    text: 'Your fertile window is approaching. Track your ovulation today.',
-    color: '#27AE60',
-    bg: '#F0FFF4',
-    quickActions: [
-      { id: 'cycle', emoji: '🌱', label: 'Ovulation' },
-      { id: 'tracker', emoji: '📊', label: 'Log Today' },
-      { id: 'bella', emoji: '🤖', label: 'Ask Bella' },
-      { id: 'nutrition', emoji: '🥗', label: 'Nutrition' },
-    ],
-  },
-  pregnant: {
-    emoji: '🤰',
-    title: 'Pregnancy Journey',
-    text: 'You are doing amazing. Log your symptoms and check your weekly update.',
-    color: '#9B59B6',
-    bg: '#F5EEFF',
-    quickActions: [
-      { id: 'pregnancy', emoji: '🤰', label: 'Pregnancy' },
-      { id: 'tracker', emoji: '📊', label: 'Symptoms' },
-      { id: 'bella', emoji: '🤖', label: 'Ask Bella' },
-      { id: 'carefinder', emoji: '🏥', label: 'Care' },
-    ],
-  },
-  surrogacy: {
-    emoji: '👶',
-    title: 'Surrogacy Journey',
-    text: 'Bella is here to support you every step of the way.',
-    color: '#E91E8C',
-    bg: '#FFF0F8',
-    quickActions: [
-      { id: 'bella', emoji: '🤖', label: 'Ask Bella' },
-      { id: 'community', emoji: '👥', label: 'Community' },
-      { id: 'academy', emoji: '📚', label: 'Learn' },
-      { id: 'carefinder', emoji: '🏥', label: 'Care' },
-    ],
-  },
-  wellbeing: {
-    emoji: '💜',
-    title: 'Wellbeing Journey',
-    text: 'Track your cycle and understand your body better every day.',
-    color: '#C9748F',
-    bg: '#FFF0F5',
-    quickActions: [
-      { id: 'cycle', emoji: '🌸', label: 'Cycle' },
-      { id: 'bella', emoji: '🤖', label: 'Ask Bella' },
-      { id: 'community', emoji: '👥', label: 'Community' },
-      { id: 'academy', emoji: '📚', label: 'Academy' },
-    ],
-  },
-};
+const UPCOMING = [
+  { emoji: '👩‍⚕️', title: 'Dr. Sarah Mitchell', sub: 'Prenatal Checkup', date: 'May 5', color: '#3498DB' },
+  { emoji: '💉', title: 'Blood Test', sub: 'Hormone Panel', date: 'May 12', color: '#E74C3C' },
+];
 
-export default function HomeScreen({ userName, userPlan, userJourney, onNavigate }) {
-  const [currentPhase] = useState(1);
-  const scrollY = useRef(new Animated.Value(0)).current;
+function PulsingHeart() {
+  const pulse = useRef(new Animated.Value(1)).current;
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulse, { toValue: 1.2, duration: 600, useNativeDriver: true }),
+        Animated.timing(pulse, { toValue: 1, duration: 600, useNativeDriver: true }),
+      ])
+    ).start();
+  }, []);
+  return (
+    <Animated.Text style={[{ fontSize: 28 }, { transform: [{ scale: pulse }] }]}>💜</Animated.Text>
+  );
+}
+export default function HomeScreen({ userName, userPlan, onNavigate }) {
+  const [tipIndex, setTipIndex] = useState(0);
+  const [water, setWater] = useState(3);
+  const fadeAnim = useRef(new Animated.Value(1)).current;
 
-  const firstName = userName ? userName.split(' ')[0] : 'Beautiful';
-  const journey = JOURNEY_CONTENT[userJourney] || JOURNEY_CONTENT.wellbeing;
+  const nextTip = () => {
+    Animated.timing(fadeAnim, { toValue: 0, duration: 200, useNativeDriver: true }).start(() => {
+      setTipIndex(prev => (prev + 1) % HEALTH_TIPS.length);
+      Animated.timing(fadeAnim, { toValue: 1, duration: 200, useNativeDriver: true }).start();
+    });
+  };
 
-  const headerHeight = scrollY.interpolate({
-    inputRange: [0, 100],
-    outputRange: [200, 120],
-    extrapolate: 'clamp',
-  });
-
-  const headerOpacity = scrollY.interpolate({
-    inputRange: [0, 80],
-    outputRange: [1, 0.9],
-    extrapolate: 'clamp',
-  });
+  const tip = HEALTH_TIPS[tipIndex];
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#FAF0F5" />
+      <ScrollView showsVerticalScrollIndicator={false}>
 
-      <Animated.ScrollView
-        style={styles.scroll}
-        showsVerticalScrollIndicator={false}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-          { useNativeDriver: false }
-        )}
-        scrollEventThrottle={16}
-      >
         {/* Header */}
-        <Animated.View style={[styles.header, { minHeight: headerHeight, opacity: headerOpacity }]}>
-          <View style={styles.headerTop}>
-            <View>
-              <Text style={styles.greeting}>Good day,</Text>
-              <Text style={styles.userName}>{firstName} 💜</Text>
-            </View>
-            <View style={styles.headerRight}>
-              <TouchableOpacity
-                style={styles.notifBtn}
-                onPress={() => onNavigate('notifications')}
-              >
-                <Text style={styles.notifIcon}>🔔</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.profileBtn}
-                onPress={() => onNavigate('profile')}
-              >
-                <Text style={styles.profileInitial}>
-                  {firstName.charAt(0).toUpperCase()}
-                </Text>
-              </TouchableOpacity>
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.greeting}>Good morning 🌸</Text>
+            <Text style={styles.userName}>{userName || 'Beautiful'}</Text>
+          </View>
+          <View style={styles.headerRight}>
+            <PulsingHeart />
+            <View style={[styles.planBadge, userPlan === 'PRO' ? styles.planPro : userPlan === 'PLUS' ? styles.planPlus : styles.planFree]}>
+              <Text style={styles.planText}>{userPlan || 'FREE'}</Text>
             </View>
           </View>
-          <View style={styles.planBadge}>
-            <Text style={styles.planBadgeText}>
-              {userPlan === 'PRO' ? '👑 PRO' : userPlan === 'PLUS' ? '⭐ PLUS' : '🆓 FREE'}
-            </Text>
-          </View>
-        </Animated.View>
-
-        {/* Journey Banner */}
-        <TouchableOpacity
-          style={[styles.journeyBanner, {
-            backgroundColor: journey.bg,
-            borderLeftColor: journey.color,
-          }]}
-          onPress={() => onNavigate('cycle')}
-        >
-          <Text style={styles.journeyBannerEmoji}>{journey.emoji}</Text>
-          <View style={styles.journeyBannerInfo}>
-            <Text style={[styles.journeyBannerTitle, { color: journey.color }]}>
-              {journey.title}
-            </Text>
-            <Text style={styles.journeyBannerText}>{journey.text}</Text>
-          </View>
-          <Text style={[styles.journeyBannerArrow, { color: journey.color }]}>›</Text>
-        </TouchableOpacity>
-
-        {/* Daily Check-In Card */}
-        <CheckInSummaryCard
-          onPress={() => onNavigate('checkin')}
-          checkInData={null}
-        />
-
-        {/* Flower Cycle Tracker */}
-        <View style={styles.flowerSection}>
-          <Text style={styles.sectionTitle}>Your Cycle</Text>
-          <View style={styles.flowerContainer}>
-            {CYCLE_PHASES.map((phase, index) => {
-              const angles = [-45, 45, 135, 225];
-              const angle = angles[index];
-              const rad = (angle * Math.PI) / 180;
-              const distance = 70;
-              const x = Math.cos(rad) * distance;
-              const y = Math.sin(rad) * distance;
-              const isActive = index === currentPhase;
-              return (
-                <TouchableOpacity
-                  key={phase.id}
-                  style={[
-                    styles.petal,
-                    {
-                      backgroundColor: isActive ? phase.color : `${phase.color}40`,
-                      transform: [
-                        { translateX: x },
-                        { translateY: y },
-                        { rotate: `${angle + 90}deg` },
-                      ],
-                      borderWidth: isActive ? 2 : 0,
-                      borderColor: phase.color,
-                    },
-                  ]}
-                  onPress={() => onNavigate('cycle')}
-                >
-                  <Text style={styles.petalEmoji}>{phase.emoji}</Text>
-                </TouchableOpacity>
-              );
-            })}
-            <TouchableOpacity
-              style={styles.flowerCenter}
-              onPress={() => onNavigate('cycle')}
-            >
-              <Text style={styles.flowerCenterEmoji}>🌸</Text>
-              <Text style={styles.flowerCenterText}>Day 8</Text>
-              <Text style={styles.flowerCenterSub}>Follicular</Text>
-            </TouchableOpacity>
-          </View>
-
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.phaseLabels}
-          >
-            {CYCLE_PHASES.map((phase, index) => (
-              <TouchableOpacity
-                key={phase.id}
-                style={[
-                  styles.phaseLabel,
-                  index === currentPhase && { backgroundColor: phase.color },
-                ]}
-                onPress={() => onNavigate('cycle')}
-              >
-                <Text style={styles.phaseLabelEmoji}>{phase.emoji}</Text>
-                <Text style={[
-                  styles.phaseLabelText,
-                  index === currentPhase && { color: '#fff' },
-                ]}>
-                  {phase.label}
-                </Text>
-                <Text style={[
-                  styles.phaseLabelDay,
-                  index === currentPhase && { color: 'rgba(255,255,255,0.8)' },
-                ]}>
-                  Day {phase.day}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
         </View>
 
-        {/* Journey Quick Actions */}
-        <View style={styles.quickSection}>
+        {/* Cycle Summary Card */}
+        <View style={styles.cycleCard}>
+          <View style={styles.cycleLeft}>
+            <Text style={styles.cycleDay}>Day 14</Text>
+            <Text style={styles.cyclePhase}>Ovulation Phase ✨</Text>
+            <Text style={styles.cycleSub}>Peak energy today!</Text>
+            <View style={styles.cycleProgressBar}>
+              <View style={styles.cycleProgressFill} />
+            </View>
+            <Text style={styles.cycleDaysLeft}>14 days until next period</Text>
+          </View>
+          <View style={styles.cycleRight}>
+            <View style={styles.cycleRing}>
+              <Text style={styles.cycleRingNum}>14</Text>
+              <Text style={styles.cycleRingOf}>of 28</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Quick Actions */}
+        <View style={styles.section}>
           <Text style={styles.sectionTitle}>Quick Actions</Text>
-          <View style={styles.quickRow}>
-            {journey.quickActions.map((action, index) => (
+          <View style={styles.quickGrid}>
+            {QUICK_ACTIONS.map(action => (
               <TouchableOpacity
-                key={index}
-                style={[styles.quickCard, {
-                  backgroundColor: FEATURES.find(f => f.id === action.id)?.bg || '#F0F0F0',
-                }]}
-                onPress={() => onNavigate(action.id)}
+                key={action.id}
+                style={[styles.quickBtn, { backgroundColor: action.bg }]}
+                onPress={() => {
+                  if (action.label === 'Water') {
+                    setWater(prev => Math.min(prev + 1, 8));
+                    Alert.alert('💧 Water logged!', `${water + 1} of 8 glasses today. Keep it up!`);
+                  } else {
+                    Alert.alert(action.label, `${action.label} logged! 💜`);
+                  }
+                }}
               >
                 <Text style={styles.quickEmoji}>{action.emoji}</Text>
-                <Text style={styles.quickLabel}>{action.label}</Text>
+                <Text style={[styles.quickLabel, { color: action.color }]}>{action.label}</Text>
               </TouchableOpacity>
             ))}
           </View>
         </View>
 
-        {/* All Features Grid */}
-        <View style={styles.featuresSection}>
-          <Text style={styles.sectionTitle}>All Features</Text>
-          <View style={styles.featuresGrid}>
-            {FEATURES.map((feature) => (
+        {/* Bella AI Card */}
+        <TouchableOpacity
+          style={styles.bellaCard}
+          onPress={() => onNavigate && onNavigate('bella')}
+        >
+          <View style={styles.bellaLeft}>
+            <View style={styles.bellaAvatar}>
+              <Text style={styles.bellaAvatarText}>B</Text>
+            </View>
+            <View>
+              <Text style={styles.bellaTitle}>Ask Bella 💜</Text>
+              <Text style={styles.bellaSub}>Your AI health companion</Text>
+            </View>
+          </View>
+          <View style={styles.bellaArrow}>
+            <Text style={styles.bellaArrowText}>→</Text>
+          </View>
+        </TouchableOpacity>
+
+        {/* Water Tracker */}
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <Text style={styles.cardTitle}>💧 Daily Water</Text>
+            <Text style={styles.waterCount}>{water}/8 glasses</Text>
+          </View>
+          <View style={styles.waterRow}>
+            {[...Array(8)].map((_, i) => (
               <TouchableOpacity
-                key={feature.id}
-                style={[styles.featureCard, { backgroundColor: feature.bg }]}
-                onPress={() => onNavigate(feature.id)}
+                key={i}
+                style={[styles.waterGlass, i < water && styles.waterGlassFull]}
+                onPress={() => setWater(i + 1)}
               >
-                <Text style={styles.featureEmoji}>{feature.emoji}</Text>
-                <Text style={[styles.featureTitle, { color: feature.accent }]}>
-                  {feature.title}
-                </Text>
-                <Text style={styles.featureSubtitle}>{feature.subtitle}</Text>
+                <Text style={styles.waterGlassEmoji}>{i < water ? '💧' : '🫙'}</Text>
               </TouchableOpacity>
             ))}
           </View>
         </View>
 
-        <View style={{ height: 40 }} />
-      </Animated.ScrollView>
+        {/* Health Tip */}
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <Text style={styles.cardTitle}>💡 Health Tip</Text>
+            <TouchableOpacity onPress={nextTip}>
+              <Text style={styles.nextTip}>Next →</Text>
+            </TouchableOpacity>
+          </View>
+          <Animated.View style={[styles.tipBox, { opacity: fadeAnim, backgroundColor: tip.color + '15' }]}>
+            <Text style={styles.tipEmoji}>{tip.emoji}</Text>
+            <Text style={styles.tipText}>{tip.tip}</Text>
+          </Animated.View>
+        </View>
+
+        {/* Virtual Consultation */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>👩‍⚕️ Virtual Consultation</Text>
+          <View style={styles.consultCard}>
+            <View style={styles.consultAvatar}>
+              <Text style={{ fontSize: 28 }}>👩‍⚕️</Text>
+            </View>
+            <View style={styles.consultInfo}>
+              <Text style={styles.consultName}>Dr. Emily Chen</Text>
+              <Text style={styles.consultRole}>OB/GYN Specialist</Text>
+              <View style={styles.starsRow}>
+                <Text style={styles.stars}>★★★★★</Text>
+                <Text style={styles.rating}>4.9 (234)</Text>
+              </View>
+            </View>
+            <View style={styles.consultOnline}>
+              <View style={styles.onlineDot} />
+            </View>
+          </View>
+          <Text style={styles.consultAvail}>✅ Available Today</Text>
+          <View style={styles.timeSlots}>
+            {['2:00 PM', '3:30 PM', '5:00 PM'].map(t => (
+              <TouchableOpacity
+                key={t}
+                style={styles.timeSlot}
+                onPress={() => Alert.alert('Book Appointment', `Book ${t} with Dr. Emily Chen? 💜`)}
+              >
+                <Text style={styles.timeSlotText}>{t}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+          <TouchableOpacity
+            style={styles.bookBtn}
+            onPress={() => Alert.alert('Book Video Consultation 💜', 'Booking system coming soon!')}
+          >
+            <Text style={styles.bookBtnText}>📹 Book Video Consultation</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Upcoming */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>📅 Upcoming</Text>
+          {UPCOMING.map((item, i) => (
+            <View key={i} style={styles.upcomingRow}>
+              <View style={[styles.upcomingIcon, { backgroundColor: item.color + '22' }]}>
+                <Text style={{ fontSize: 20 }}>{item.emoji}</Text>
+              </View>
+              <View style={styles.upcomingInfo}>
+                <Text style={styles.upcomingTitle}>{item.title}</Text>
+                <Text style={styles.upcomingSub}>{item.sub}</Text>
+              </View>
+              <View style={[styles.upcomingDate, { backgroundColor: item.color + '22' }]}>
+                <Text style={[styles.upcomingDateText, { color: item.color }]}>{item.date}</Text>
+              </View>
+            </View>
+          ))}
+        </View>
+
+        <View style={{ height: 100 }} />
+      </ScrollView>
     </SafeAreaView>
   );
 }
-
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: COLORS.background },
-  scroll: { flex: 1 },
+  container: { flex: 1, backgroundColor: '#FAF0F5' },
   header: {
-    backgroundColor: COLORS.primary,
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 24,
-    borderBottomLeftRadius: 28,
-    borderBottomRightRadius: 28,
+    flexDirection: 'row', justifyContent: 'space-between',
+    alignItems: 'center', paddingHorizontal: 20, paddingTop: 16, paddingBottom: 12,
   },
-  headerTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 12,
+  greeting: { fontSize: 14, color: '#9B8FA0', fontWeight: '600' },
+  userName: { fontSize: 24, fontWeight: '800', color: '#2D1B2E' },
+  headerRight: { alignItems: 'center', gap: 8 },
+  planBadge: { borderRadius: 20, paddingHorizontal: 12, paddingVertical: 4 },
+  planFree: { backgroundColor: '#EDE0E8' },
+  planPlus: { backgroundColor: '#F0EAFF' },
+  planPro: { backgroundColor: '#FFF3CD' },
+  planText: { fontSize: 11, fontWeight: '800', color: '#2D1B2E' },
+  cycleCard: {
+    marginHorizontal: 20, marginBottom: 20, backgroundColor: '#C9748F',
+    borderRadius: 24, padding: 20, flexDirection: 'row',
+    shadowColor: '#C9748F', shadowOpacity: 0.3, shadowRadius: 12, elevation: 6,
   },
-  greeting: { fontSize: 14, color: 'rgba(255,255,255,0.8)' },
-  userName: { fontSize: 24, fontWeight: '800', color: '#fff', marginTop: 2 },
-  headerRight: { flexDirection: 'row', gap: 10, alignItems: 'center' },
-  notifBtn: {
-    width: 40, height: 40, borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    alignItems: 'center', justifyContent: 'center',
+  cycleLeft: { flex: 1 },
+  cycleDay: { fontSize: 28, fontWeight: '800', color: '#fff' },
+  cyclePhase: { fontSize: 16, fontWeight: '700', color: '#FFE8F0', marginBottom: 4 },
+  cycleSub: { fontSize: 13, color: '#FFD6E7', marginBottom: 12 },
+  cycleProgressBar: {
+    height: 6, backgroundColor: 'rgba(255,255,255,0.3)',
+    borderRadius: 3, marginBottom: 6,
   },
-  notifIcon: { fontSize: 18 },
-  profileBtn: {
-    width: 40, height: 40, borderRadius: 20,
-    backgroundColor: '#fff',
-    alignItems: 'center', justifyContent: 'center',
+  cycleProgressFill: {
+    height: 6, backgroundColor: '#fff',
+    borderRadius: 3, width: '50%',
   },
-  profileInitial: { fontSize: 18, fontWeight: '800', color: COLORS.primary },
-  planBadge: {
-    alignSelf: 'flex-start',
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    borderRadius: 50, paddingHorizontal: 14, paddingVertical: 6,
-  },
-  planBadgeText: { color: '#fff', fontSize: 13, fontWeight: '700' },
-  journeyBanner: {
-    marginHorizontal: 20, marginTop: 16,
-    borderRadius: 16, padding: 16,
-    flexDirection: 'row', alignItems: 'center',
-    gap: 12, borderLeftWidth: 4,
-  },
-  journeyBannerEmoji: { fontSize: 28 },
-  journeyBannerInfo: { flex: 1 },
-  journeyBannerTitle: { fontSize: 14, fontWeight: '800', marginBottom: 3 },
-  journeyBannerText: { fontSize: 12, color: COLORS.textLight, lineHeight: 18 },
-  journeyBannerArrow: { fontSize: 24, fontWeight: '700' },
-  flowerSection: {
-    margin: 20,
-    backgroundColor: COLORS.white,
-    borderRadius: 24, padding: 20,
-    alignItems: 'center',
-    shadowColor: '#000', shadowOpacity: 0.06,
-    shadowRadius: 12, elevation: 3,
-  },
-  sectionTitle: {
-    fontSize: 18, fontWeight: '800',
-    color: COLORS.text, marginBottom: 16,
-    alignSelf: 'flex-start',
-  },
-  flowerContainer: {
-    width: 200, height: 200,
-    alignItems: 'center', justifyContent: 'center',
-    marginBottom: 20,
-  },
-  petal: {
-    position: 'absolute',
-    width: 52, height: 72,
-    borderRadius: 26,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  petalEmoji: { fontSize: 20 },
-  flowerCenter: {
+  cycleDaysLeft: { fontSize: 12, color: '#FFD6E7' },
+  cycleRight: { alignItems: 'center', justifyContent: 'center' },
+  cycleRing: {
     width: 80, height: 80, borderRadius: 40,
-    backgroundColor: COLORS.primaryLight,
+    borderWidth: 4, borderColor: 'rgba(255,255,255,0.5)',
     alignItems: 'center', justifyContent: 'center',
-    borderWidth: 3, borderColor: COLORS.primary,
-    zIndex: 10,
+    backgroundColor: 'rgba(255,255,255,0.15)',
   },
-  flowerCenterEmoji: { fontSize: 22 },
-  flowerCenterText: { fontSize: 12, fontWeight: '800', color: COLORS.primary },
-  flowerCenterSub: { fontSize: 10, color: COLORS.textLight },
-  phaseLabels: { gap: 8, paddingHorizontal: 4 },
-  phaseLabel: {
-    alignItems: 'center', paddingHorizontal: 14,
-    paddingVertical: 8, borderRadius: 16,
-    backgroundColor: COLORS.background, minWidth: 80,
+  cycleRingNum: { fontSize: 24, fontWeight: '800', color: '#fff' },
+  cycleRingOf: { fontSize: 11, color: '#FFD6E7' },
+  section: { marginHorizontal: 20, marginBottom: 20 },
+  sectionTitle: { fontSize: 18, fontWeight: '800', color: '#2D1B2E', marginBottom: 12 },
+  quickGrid: { flexDirection: 'row', gap: 10 },
+  quickBtn: {
+    flex: 1, borderRadius: 16, paddingVertical: 14,
+    alignItems: 'center', gap: 6,
+    shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 6, elevation: 2,
   },
-  phaseLabelEmoji: { fontSize: 16 },
-  phaseLabelText: { fontSize: 12, fontWeight: '700', color: COLORS.text, marginTop: 2 },
-  phaseLabelDay: { fontSize: 10, color: COLORS.textLight },
-  quickSection: { paddingHorizontal: 20, marginBottom: 8 },
-  quickRow: { flexDirection: 'row', gap: 10 },
-  quickCard: {
-    flex: 1, borderRadius: 16, padding: 14,
+  quickEmoji: { fontSize: 24 },
+  quickLabel: { fontSize: 11, fontWeight: '700', textAlign: 'center' },
+  bellaCard: {
+    marginHorizontal: 20, marginBottom: 20,
+    backgroundColor: '#2D1B2E', borderRadius: 20,
+    padding: 16, flexDirection: 'row',
+    alignItems: 'center', justifyContent: 'space-between',
+    shadowColor: '#2D1B2E', shadowOpacity: 0.2, shadowRadius: 12, elevation: 4,
+  },
+  bellaLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  bellaAvatar: {
+    width: 44, height: 44, borderRadius: 22,
+    backgroundColor: '#C9748F', alignItems: 'center', justifyContent: 'center',
+  },
+  bellaAvatarText: { color: '#fff', fontSize: 20, fontWeight: '800' },
+  bellaTitle: { fontSize: 16, fontWeight: '800', color: '#fff' },
+  bellaSub: { fontSize: 13, color: '#9B8FA0' },
+  bellaArrow: {
+    width: 36, height: 36, borderRadius: 18,
+    backgroundColor: '#C9748F', alignItems: 'center', justifyContent: 'center',
+  },
+  bellaArrowText: { color: '#fff', fontSize: 18, fontWeight: '700' },
+  card: {
+    backgroundColor: '#fff', borderRadius: 20, marginHorizontal: 20,
+    marginBottom: 16, padding: 16, shadowColor: '#000',
+    shadowOpacity: 0.04, shadowRadius: 8, elevation: 2,
+  },
+  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+  cardTitle: { fontSize: 16, fontWeight: '800', color: '#2D1B2E', marginBottom: 12 },
+  waterCount: { fontSize: 14, fontWeight: '700', color: '#3498DB' },
+  waterRow: { flexDirection: 'row', justifyContent: 'space-between' },
+  waterGlass: {
+    width: 36, height: 36, borderRadius: 10,
+    backgroundColor: '#FAF0F5', alignItems: 'center', justifyContent: 'center',
+  },
+  waterGlassFull: { backgroundColor: '#EAF4FF' },
+  waterGlassEmoji: { fontSize: 20 },
+  nextTip: { fontSize: 13, fontWeight: '700', color: '#C9748F' },
+  tipBox: {
+    borderRadius: 16, padding: 14,
+    flexDirection: 'row', alignItems: 'flex-start', gap: 10,
+  },
+  tipEmoji: { fontSize: 24 },
+  tipText: { flex: 1, fontSize: 14, color: '#2D1B2E', lineHeight: 22 },
+  consultCard: {
+    flexDirection: 'row', alignItems: 'center',
+    gap: 12, marginBottom: 12,
+  },
+  consultAvatar: {
+    width: 52, height: 52, borderRadius: 16,
+    backgroundColor: '#EAF4FF', alignItems: 'center', justifyContent: 'center',
+  },
+  consultInfo: { flex: 1 },
+  consultName: { fontSize: 15, fontWeight: '800', color: '#2D1B2E' },
+  consultRole: { fontSize: 12, color: '#9B8FA0', marginBottom: 4 },
+  starsRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  stars: { fontSize: 12, color: '#F59E0B' },
+  rating: { fontSize: 12, color: '#9B8FA0' },
+  consultOnline: { alignItems: 'center', justifyContent: 'center' },
+  onlineDot: {
+    width: 12, height: 12, borderRadius: 6, backgroundColor: '#27AE60',
+    shadowColor: '#27AE60', shadowOpacity: 0.4, shadowRadius: 4, elevation: 2,
+  },
+  consultAvail: { fontSize: 13, color: '#27AE60', fontWeight: '700', marginBottom: 12 },
+  timeSlots: { flexDirection: 'row', gap: 8, marginBottom: 12 },
+  timeSlot: {
+    flex: 1, borderWidth: 1.5, borderColor: '#27AE60',
+    borderRadius: 12, paddingVertical: 10, alignItems: 'center',
+  },
+  timeSlotText: { fontSize: 13, fontWeight: '700', color: '#27AE60' },
+  bookBtn: {
+    backgroundColor: '#27AE60', borderRadius: 50,
+    paddingVertical: 14, alignItems: 'center',
+  },
+  bookBtnText: { color: '#fff', fontWeight: '800', fontSize: 15 },
+  upcomingRow: {
+    flexDirection: 'row', alignItems: 'center',
+    gap: 12, paddingVertical: 10,
+    borderBottomWidth: 1, borderBottomColor: '#FAF0F5',
+  },
+  upcomingIcon: {
+    width: 44, height: 44, borderRadius: 12,
     alignItems: 'center', justifyContent: 'center',
   },
-  quickEmoji: { fontSize: 26, marginBottom: 6 },
-  quickLabel: { fontSize: 11, fontWeight: '700', color: COLORS.text, textAlign: 'center' },
-  featuresSection: { paddingHorizontal: 20, marginTop: 16 },
-  featuresGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
-  featureCard: {
-    width: (width - 52) / 2,
-    borderRadius: 20, padding: 18,
-    alignItems: 'flex-start',
-  },
-  featureEmoji: { fontSize: 28, marginBottom: 8 },
-  featureTitle: { fontSize: 14, fontWeight: '800', marginBottom: 4 },
-  featureSubtitle: { fontSize: 12, color: COLORS.textLight },
+  upcomingInfo: { flex: 1 },
+  upcomingTitle: { fontSize: 14, fontWeight: '700', color: '#2D1B2E' },
+  upcomingSub: { fontSize: 12, color: '#9B8FA0' },
+  upcomingDate: { borderRadius: 10, paddingHorizontal: 10, paddingVertical: 6 },
+  upcomingDateText: { fontSize: 12, fontWeight: '800' },
 });
