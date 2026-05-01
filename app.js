@@ -152,13 +152,15 @@ export default function App() {
             />
           );
         case 'community':
-          return (
-            <CommunityScreen
-              userName={userName}
-              userPlan={userPlan}
-              onNavigate={(screen) => setSubScreen(screen)}
-            />
-          );
+  return (
+    <CommunityScreen
+      userName={userName}
+      userPlan={userPlan}
+      onNavigate={(screen) => setSubScreen(screen)}
+      onTopicPress={(topic) => setSubScreen('topic_' + topic.id)}
+    />
+  );
+
         case 'profile':
           return (
             <ProfileScreen

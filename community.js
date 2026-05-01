@@ -7,12 +7,84 @@ import {
 import COLORS from './colors';
 
 const TOPICS = [
-  { id: '1', title: 'Hormones\n& Cycle', emoji: '🌸', gradient: ['#E74C3C', '#C0392B'] },
-  { id: '2', title: 'Pregnancy\nCare', emoji: '🤰', gradient: ['#9B59B6', '#8E44AD'] },
-  { id: '3', title: 'Mental\nHealth', emoji: '🧠', gradient: ['#3498DB', '#2980B9'] },
-  { id: '4', title: 'Birth\nControl', emoji: '💊', gradient: ['#27AE60', '#229954'] },
-  { id: '5', title: 'Nutrition', emoji: '🥗', gradient: ['#F39C12', '#E67E22'] },
-  { id: '6', title: 'Intimacy\nHealth', emoji: '💜', gradient: ['#C9748F', '#A85570'] },
+  {
+    id: '1', title: 'Hormones\n& Cycle', emoji: '🌸',
+    gradient: ['#E74C3C', '#C0392B'], fullTitle: 'Hormones & Cycle',
+    description: 'Understanding your hormones is the key to understanding your body. Learn how oestrogen, progesterone and testosterone affect your cycle, mood, energy and overall health.',
+    articles: [
+      { title: 'The 4 Phases of Your Cycle Explained', readTime: '5 min', emoji: '🔄' },
+      { title: 'How Oestrogen Affects Your Mood', readTime: '4 min', emoji: '😊' },
+      { title: 'Signs Your Hormones Are Out of Balance', readTime: '6 min', emoji: '⚠️' },
+      { title: 'Foods That Balance Your Hormones', readTime: '5 min', emoji: '🥗' },
+      { title: 'Cycle Syncing: Work With Your Hormones', readTime: '7 min', emoji: '📅' },
+    ],
+    tips: ['Track your cycle for at least 3 months to see patterns', 'Note mood changes throughout your cycle', 'Eat iron-rich foods during your period'],
+  },
+  {
+    id: '2', title: 'Pregnancy\nCare', emoji: '🤰',
+    gradient: ['#9B59B6', '#8E44AD'], fullTitle: 'Pregnancy Care',
+    description: 'Everything you need to know about pregnancy from conception to birth. Week by week guidance, symptom management and expert advice for every stage of your journey.',
+    articles: [
+      { title: 'First Trimester: Week by Week Guide', readTime: '8 min', emoji: '👶' },
+      { title: 'Essential Nutrients During Pregnancy', readTime: '5 min', emoji: '💊' },
+      { title: 'Managing Morning Sickness Naturally', readTime: '4 min', emoji: '🤢' },
+      { title: 'Safe Exercises During Pregnancy', readTime: '6 min', emoji: '🏃' },
+      { title: 'Preparing Your Birth Plan', readTime: '7 min', emoji: '📋' },
+    ],
+    tips: ['Take folic acid before and during pregnancy', 'Attend all prenatal appointments', 'Stay hydrated and rest when needed'],
+  },
+  {
+    id: '3', title: 'Mental\nHealth', emoji: '🧠',
+    gradient: ['#3498DB', '#2980B9'], fullTitle: 'Mental Health',
+    description: 'Your mental health is just as important as your physical health. Explore the connection between hormones and mood, and discover evidence-based strategies for emotional wellbeing.',
+    articles: [
+      { title: 'How Your Cycle Affects Your Mental Health', readTime: '6 min', emoji: '🔄' },
+      { title: 'Understanding PMDD vs PMS', readTime: '5 min', emoji: '📊' },
+      { title: 'Anxiety Management Techniques', readTime: '7 min', emoji: '😮‍💨' },
+      { title: 'When to Seek Professional Help', readTime: '4 min', emoji: '👩‍⚕️' },
+      { title: 'Building Emotional Resilience', readTime: '8 min', emoji: '💪' },
+    ],
+    tips: ['Practice mindfulness for 10 minutes daily', 'Track mood alongside your cycle', 'Reach out for support when needed'],
+  },
+  {
+    id: '4', title: 'Birth\nControl', emoji: '💊',
+    gradient: ['#27AE60', '#229954'], fullTitle: 'Birth Control',
+    description: 'A comprehensive guide to contraception options available to women. Understand the benefits, side effects and effectiveness of each method to make an informed choice.',
+    articles: [
+      { title: 'Complete Guide to Contraception', readTime: '10 min', emoji: '📖' },
+      { title: 'Hormonal vs Non-Hormonal Options', readTime: '6 min', emoji: '⚖️' },
+      { title: 'The Pill: Benefits and Side Effects', readTime: '5 min', emoji: '💊' },
+      { title: 'IUD: Everything You Need to Know', readTime: '7 min', emoji: '🔩' },
+      { title: 'Emergency Contraception Guide', readTime: '4 min', emoji: '🚨' },
+    ],
+    tips: ['Talk to your GP about the best option for you', 'No contraception is 100% effective', 'Regular STI testing is recommended'],
+  },
+  {
+    id: '5', title: 'Nutrition', emoji: '🥗',
+    gradient: ['#F39C12', '#E67E22'], fullTitle: 'Nutrition & Health',
+    description: 'Nutrition plays a vital role in hormonal health, cycle regulation and overall wellbeing. Learn which foods support your body through every phase of your cycle.',
+    articles: [
+      { title: 'Eating for Your Cycle Phases', readTime: '7 min', emoji: '🌸' },
+      { title: 'Iron-Rich Foods for Your Period', readTime: '4 min', emoji: '🥩' },
+      { title: 'Anti-Inflammatory Diet for Women', readTime: '6 min', emoji: '🫐' },
+      { title: 'Supplements for Hormonal Health', readTime: '5 min', emoji: '💊' },
+      { title: 'Gut Health and Hormones Connection', readTime: '8 min', emoji: '🦠' },
+    ],
+    tips: ['Eat plenty of iron during your period', 'Magnesium helps reduce PMS symptoms', 'Stay hydrated throughout your cycle'],
+  },
+  {
+    id: '6', title: 'Intimacy\nHealth', emoji: '💜',
+    gradient: ['#C9748F', '#A85570'], fullTitle: 'Intimacy Health',
+    description: 'Intimacy and sexual health are important parts of overall wellbeing. Explore topics around desire, relationships, sexual health and body confidence in a safe space.',
+    articles: [
+      { title: 'Understanding Your Libido & Hormones', readTime: '6 min', emoji: '🔄' },
+      { title: 'Pelvic Floor Health Guide', readTime: '5 min', emoji: '💪' },
+      { title: 'Communication in Relationships', readTime: '7 min', emoji: '💬' },
+      { title: 'Sexual Health: STI Guide', readTime: '8 min', emoji: '🏥' },
+      { title: 'Body Confidence & Self-Love', readTime: '5 min', emoji: '✨' },
+    ],
+    tips: ['Pelvic floor exercises benefit all women', 'Open communication strengthens relationships', 'Regular sexual health checks are important'],
+  },
 ];
 
 const POPULAR = [
@@ -26,7 +98,7 @@ const POSTS = [
   { id: '2', name: 'Amanda K.', initial: 'A', color: '#3498DB', topic: 'PCOS Management', content: 'My experience with diet changes and cycle regulation over 6 months', likes: 189, comments: 67 },
 ];
 
-function TopicTile({ topic }) {
+function TopicTile({ topic, onTopicPress }) {
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const bounceAnim = useRef(new Animated.Value(0)).current;
 
@@ -54,7 +126,7 @@ function TopicTile({ topic }) {
     <TouchableOpacity
       onPressIn={onPressIn}
       onPressOut={onPressOut}
-      onPress={() => Alert.alert(topic.title.replace('\n', ' '), 'Full course coming soon! 💜')}
+      onPress={() => onTopicPress && onTopicPress(topic)}
       activeOpacity={1}
     >
       <Animated.View style={[
@@ -70,16 +142,97 @@ function TopicTile({ topic }) {
     </TouchableOpacity>
   );
 }
-export default function CommunityScreen() {
+function TopicDetailScreen({ topic, onBack }) {
+  const [savedArticles, setSavedArticles] = useState([]);
+
+  const toggleSave = (title) => {
+    setSavedArticles(prev =>
+      prev.includes(title) ? prev.filter(t => t !== title) : [...prev, title]
+    );
+  };
+
+  return (
+    <SafeAreaView style={[styles.container, { backgroundColor: '#FAF0F5' }]}>
+      <StatusBar barStyle="dark-content" />
+      <ScrollView showsVerticalScrollIndicator={false}>
+
+        {/* Hero */}
+        <View style={[styles.topicHero, { backgroundColor: topic.gradient[0] }]}>
+          <TouchableOpacity onPress={onBack} style={styles.topicBackBtn}>
+            <Text style={styles.topicBackText}>← Back</Text>
+          </TouchableOpacity>
+          <Text style={styles.topicHeroEmoji}>{topic.emoji}</Text>
+          <Text style={styles.topicHeroTitle}>{topic.fullTitle}</Text>
+        </View>
+
+        {/* Description */}
+        <View style={styles.topicDescCard}>
+          <Text style={styles.topicDescText}>{topic.description}</Text>
+        </View>
+
+        {/* Quick Tips */}
+        <View style={styles.tipsCard}>
+          <Text style={styles.tipsTitle}>💡 Quick Tips</Text>
+          {topic.tips.map((tip, i) => (
+            <View key={i} style={styles.tipRow}>
+              <View style={[styles.tipDot, { backgroundColor: topic.gradient[0] }]} />
+              <Text style={styles.tipText}>{tip}</Text>
+            </View>
+          ))}
+        </View>
+
+        {/* Articles */}
+        <View style={styles.articlesSection}>
+          <Text style={styles.articlesSectionTitle}>📚 Articles & Guides</Text>
+          {topic.articles.map((article, i) => (
+            <TouchableOpacity
+              key={i}
+              style={styles.articleCard}
+              onPress={() => Alert.alert(article.title, 'Full article coming soon! 💜\n\nWe are adding new content every week.')}
+            >
+              <View style={[styles.articleIconBox, { backgroundColor: topic.gradient[0] + '22' }]}>
+                <Text style={styles.articleEmoji}>{article.emoji}</Text>
+              </View>
+              <View style={styles.articleInfo}>
+                <Text style={styles.articleTitle}>{article.title}</Text>
+                <Text style={styles.articleReadTime}>⏱ {article.readTime} read</Text>
+              </View>
+              <TouchableOpacity onPress={() => toggleSave(article.title)}>
+                <Text style={styles.articleSave}>
+                  {savedArticles.includes(article.title) ? '💜' : '🤍'}
+                </Text>
+              </TouchableOpacity>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* Ask Bella */}
+        <TouchableOpacity
+          style={[styles.bellaCard, { backgroundColor: topic.gradient[0] }]}
+          onPress={() => Alert.alert('Ask Bella 💜', 'Go to the AI Chat tab to ask Bella about ' + topic.fullTitle)}
+        >
+          <Text style={styles.bellaCardEmoji}>🤖</Text>
+          <View style={styles.bellaCardInfo}>
+            <Text style={styles.bellaCardTitle}>Ask Bella About This</Text>
+            <Text style={styles.bellaCardSub}>Get personalised answers from your AI nurse</Text>
+          </View>
+          <Text style={styles.bellaCardArrow}>→</Text>
+        </TouchableOpacity>
+
+        <View style={{ height: 100 }} />
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+export default function CommunityScreen({ userName, userPlan, onNavigate }) {
   const [likedPosts, setLikedPosts] = useState({});
-  const [activeCategory, setActiveCategory] = useState('All');
+  const [selectedTopic, setSelectedTopic] = useState(null);
   const progressAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     Animated.timing(progressAnim, {
-      toValue: 0.65,
-      duration: 1500,
-      useNativeDriver: false,
+      toValue: 0.65, duration: 1500, useNativeDriver: false,
     }).start();
   }, []);
 
@@ -88,9 +241,12 @@ export default function CommunityScreen() {
   };
 
   const progressWidth = progressAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0%', '100%'],
+    inputRange: [0, 1], outputRange: ['0%', '100%'],
   });
+
+  if (selectedTopic) {
+    return <TopicDetailScreen topic={selectedTopic} onBack={() => setSelectedTopic(null)} />;
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -99,10 +255,8 @@ export default function CommunityScreen() {
 
         {/* Header */}
         <View style={styles.header}>
-          <View>
-            <Text style={styles.headerTitle}>Bellava Academy</Text>
-            <Text style={styles.headerSub}>Learn about your health journey ✨</Text>
-          </View>
+          <Text style={styles.headerTitle}>Bellava Academy</Text>
+          <Text style={styles.headerSub}>Learn about your health journey ✨</Text>
         </View>
 
         {/* Continue Learning */}
@@ -113,7 +267,7 @@ export default function CommunityScreen() {
           </View>
           <TouchableOpacity
             style={styles.videoCard}
-            onPress={() => Alert.alert('Video Player', 'Video playback coming soon! 💜')}
+            onPress={() => Alert.alert('Video Player 💜', 'Video lessons coming soon!')}
           >
             <View style={styles.videoThumb}>
               <View style={styles.playBtn}>
@@ -137,9 +291,14 @@ export default function CommunityScreen() {
         {/* Explore Topics */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Explore Topics</Text>
+          <Text style={styles.sectionSub}>Tap to explore each topic 💜</Text>
           <View style={styles.topicsGrid}>
             {TOPICS.map(topic => (
-              <TopicTile key={topic.id} topic={topic} />
+              <TopicTile
+                key={topic.id}
+                topic={topic}
+                onTopicPress={(t) => setSelectedTopic(t)}
+              />
             ))}
           </View>
         </View>
@@ -177,7 +336,7 @@ export default function CommunityScreen() {
           ))}
         </View>
 
-        {/* Ask Our Experts */}
+        {/* Expert Session */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Ask Our Experts</Text>
           <View style={styles.expertCard}>
@@ -250,44 +409,38 @@ export default function CommunityScreen() {
 }
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FAF0F5' },
-  header: {
-    paddingHorizontal: 20, paddingTop: 16, paddingBottom: 8,
-  },
+  header: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 8 },
   headerTitle: { fontSize: 28, fontWeight: '800', color: '#C9748F' },
   headerSub: { fontSize: 14, color: '#9B8FA0', marginTop: 2 },
   section: { marginBottom: 24, paddingHorizontal: 20 },
   sectionRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 },
   sectionIcon: { fontSize: 18 },
-  sectionTitle: { fontSize: 18, fontWeight: '800', color: '#2D1B2E', marginBottom: 12 },
+  sectionTitle: { fontSize: 18, fontWeight: '800', color: '#2D1B2E', marginBottom: 4 },
+  sectionSub: { fontSize: 13, color: '#9B8FA0', marginBottom: 12 },
   videoCard: {
     backgroundColor: '#fff', borderRadius: 20,
     overflow: 'hidden', shadowColor: '#C9748F',
     shadowOpacity: 0.1, shadowRadius: 12, elevation: 4,
   },
   videoThumb: {
-    height: 180, backgroundColor: '#E8D5E8',
-    backgroundImage: 'linear-gradient(135deg, #C9748F, #9B59B6)',
+    height: 160, backgroundColor: '#E8D5E8',
     alignItems: 'center', justifyContent: 'center',
   },
   playBtn: {
-    width: 60, height: 60, borderRadius: 30,
+    width: 56, height: 56, borderRadius: 28,
     backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center',
     shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 8, elevation: 4,
   },
-  playIcon: { fontSize: 22, color: '#C9748F', marginLeft: 4 },
+  playIcon: { fontSize: 20, color: '#C9748F', marginLeft: 4 },
   videoInfo: { padding: 16 },
   videoTitle: { fontSize: 16, fontWeight: '800', color: '#2D1B2E', marginBottom: 8 },
   videoMeta: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 },
   videoDuration: { fontSize: 13, color: '#9B8FA0' },
   videoDot: { color: '#9B8FA0' },
   videoProgress: { fontSize: 13, color: '#C9748F', fontWeight: '700' },
-  progressBarWrap: {
-    height: 6, backgroundColor: '#EDE0E8', borderRadius: 3, overflow: 'hidden',
-  },
+  progressBarWrap: { height: 6, backgroundColor: '#EDE0E8', borderRadius: 3, overflow: 'hidden' },
   progressBarFill: { height: 6, backgroundColor: '#C9748F', borderRadius: 3 },
-  topicsGrid: {
-    flexDirection: 'row', flexWrap: 'wrap', gap: 12,
-  },
+  topicsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   topicTile: {
     width: 155, height: 140, borderRadius: 20,
     alignItems: 'center', justifyContent: 'center',
@@ -295,10 +448,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15, shadowRadius: 8, elevation: 4,
   },
   topicEmoji: { fontSize: 40, marginBottom: 8 },
-  topicTitle: {
-    fontSize: 14, fontWeight: '800', color: '#fff',
-    textAlign: 'center', lineHeight: 20,
-  },
+  topicTitle: { fontSize: 14, fontWeight: '800', color: '#fff', textAlign: 'center', lineHeight: 20 },
   popularCard: {
     flexDirection: 'row', backgroundColor: '#fff',
     borderRadius: 16, marginBottom: 12, overflow: 'hidden',
@@ -370,4 +520,58 @@ const styles = StyleSheet.create({
   actionText: { fontSize: 13, fontWeight: '600', color: '#9B8FA0' },
   readMoreBtn: { marginLeft: 'auto' },
   readMoreText: { fontSize: 13, fontWeight: '700', color: '#C9748F' },
+  topicHero: {
+    height: 220, alignItems: 'center', justifyContent: 'center',
+    paddingTop: 20,
+  },
+  topicBackBtn: {
+    position: 'absolute', top: 16, left: 16,
+    backgroundColor: 'rgba(255,255,255,0.3)',
+    borderRadius: 20, paddingHorizontal: 14, paddingVertical: 6,
+  },
+  topicBackText: { color: '#fff', fontWeight: '700', fontSize: 15 },
+  topicHeroEmoji: { fontSize: 72, marginBottom: 8 },
+  topicHeroTitle: { fontSize: 26, fontWeight: '800', color: '#fff', textAlign: 'center' },
+  topicDescCard: {
+    backgroundColor: '#fff', borderRadius: 20,
+    marginHorizontal: 20, marginTop: -20, marginBottom: 16,
+    padding: 16, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 8, elevation: 3,
+  },
+  topicDescText: { fontSize: 15, color: '#2D1B2E', lineHeight: 24 },
+  tipsCard: {
+    backgroundColor: '#fff', borderRadius: 20,
+    marginHorizontal: 20, marginBottom: 16, padding: 16,
+    shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 6, elevation: 2,
+  },
+  tipsTitle: { fontSize: 16, fontWeight: '800', color: '#2D1B2E', marginBottom: 12 },
+  tipRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 },
+  tipDot: { width: 8, height: 8, borderRadius: 4 },
+  tipText: { flex: 1, fontSize: 14, color: '#2D1B2E', lineHeight: 20 },
+  articlesSection: { marginHorizontal: 20, marginBottom: 16 },
+  articlesSectionTitle: { fontSize: 18, fontWeight: '800', color: '#2D1B2E', marginBottom: 12 },
+  articleCard: {
+    flexDirection: 'row', alignItems: 'center',
+    backgroundColor: '#fff', borderRadius: 16,
+    padding: 14, marginBottom: 8, gap: 12,
+    shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 6, elevation: 2,
+  },
+  articleIconBox: {
+    width: 48, height: 48, borderRadius: 14,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  articleEmoji: { fontSize: 24 },
+  articleInfo: { flex: 1 },
+  articleTitle: { fontSize: 14, fontWeight: '700', color: '#2D1B2E', marginBottom: 4 },
+  articleReadTime: { fontSize: 12, color: '#9B8FA0' },
+  articleSave: { fontSize: 22 },
+  bellaCard: {
+    marginHorizontal: 20, marginBottom: 20,
+    borderRadius: 20, padding: 16,
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+  },
+  bellaCardEmoji: { fontSize: 32 },
+  bellaCardInfo: { flex: 1 },
+  bellaCardTitle: { fontSize: 16, fontWeight: '800', color: '#fff' },
+  bellaCardSub: { fontSize: 13, color: 'rgba(255,255,255,0.8)', marginTop: 2 },
+  bellaCardArrow: { fontSize: 22, color: '#fff', fontWeight: '700' },
 });
